@@ -2,6 +2,7 @@ from sim_base_class import SimBaseClass
 from PyQt5.QtGui import QPixmap, QPainter
 from PyQt5.QtCore import Qt
 from typing import List
+import cairo
 
 ## @package environment
 #  Среда. В ней будет все
@@ -20,6 +21,21 @@ class Environment:
         self.present_elements.append(element)
         self.width = max(element.x + element.width, self.width)
         self.height = max(element.y + element.height, self.height)
+
+    def get_img_as_surface(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
+        cr = cairo.Context(surface)
+
+        for element in self.present_elements:
+            element_surface = element.get_img_as_surface(element.width, element.height)
+            cr.set_source_surface(element_surface, element.x, element.y)
+            cr.paint()
+
+        return surface
+
+    def get_img_as_byte_data(self):
+        surface = self.get_img_as_surface()
+        return SimBaseClass.get_data_from_surface(surface)
 
     def draw_qpixmap(self):
         '''

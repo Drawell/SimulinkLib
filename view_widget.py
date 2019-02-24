@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QDataStream, QIODevice, pyqtSignal
-from PyQt5.QtGui import QPixmap, QPainter, QDropEvent, QDragEnterEvent, QDragMoveEvent, QDragLeaveEvent
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QDropEvent, QDragEnterEvent, QDragMoveEvent, QDragLeaveEvent
 
 
 # на этом виджете будем рсовать
@@ -11,8 +11,11 @@ class ViewWidget(QWidget):
     def __init__(self, parent):
         super(ViewWidget, self).__init__(parent)
         self.show()
-        self.canvas = QPixmap(500, 500)
+        self.canvas = QPixmap(500, 500)  # this present size canvas
         self.canvas.fill(Qt.white)
+        self.present_canvas = QPixmap(500, 500)  # there is all that we could see
+        self.present_canvas.fill(Qt.white)
+
         self.painter = QPainter(self)
         self.setMinimumSize(400, 400)
         self.resize(500, 500)
@@ -21,9 +24,9 @@ class ViewWidget(QWidget):
     def resize(self, w, h):
         super(ViewWidget, self).resize(w, h)
         tmp_canvas = self.canvas
-        self.canvas = QPixmap(self.width(), self.height())
+        self.canvas = QPixmap(max(self.width(), self.canvas.width()), max(self.height(), self.canvas.width()))
         self.painter.begin(self.canvas)
-        self.painter.fillRect(0, 0, self.width(), self.height(), Qt.white)
+        self.painter.fillRect(0, 0, self.canvas.width(), self.canvas.height(), Qt.white)
         self.painter.drawPixmap(0, 0, tmp_canvas)
         self.painter.end()
 
@@ -38,10 +41,14 @@ class ViewWidget(QWidget):
         self.painter.drawPixmap(0, 0, self.canvas)
         self.painter.end()
 
-    def draw_pixmap(self, pixmap: QPixmap):
+    def draw_pixmap(self, pixmap: QPixmap, x: int = 0, y: int = 0):
         self.painter.begin(self.canvas)
-        self.painter.drawPixmap(0, 0, pixmap)
+        self.canvas.fill(Qt.white)
+        self.painter.drawPixmap(x, y, pixmap)
         self.painter.end()
+
+    def draw_image(self, img: QImage, x: int = 0, y: int = 0):
+        self.draw_pixmap(QPixmap(img), x, y)
 
     def dragLeaveEvent(self, event: QDragLeaveEvent):
         event.accept()
@@ -69,27 +76,3 @@ class ViewWidget(QWidget):
             event.acceptProposedAction()
         else:
             event.ignore()
-
-        '''if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
-        QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
-        QDataStream dataStream(&itemData, QIODevice::ReadOnly);
-
-        QPixmap pixmap;
-        QPoint offset;
-        dataStream >> pixmap >> offset;
-
-        QLabel *newIcon = new QLabel(this);
-        newIcon->setPixmap(pixmap);
-        newIcon->move(event->pos() - offset);
-        newIcon->show();
-        newIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-        if (event->source() == this) {
-            event->setDropAction(Qt::MoveAction);
-            event->accept();
-        } else {
-            event->acceptProposedAction();
-        }
-    } else {
-        event->ignore();
-    }'''

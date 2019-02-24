@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QFrame, QListView, QAbstractItemView
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QVariant, QMimeData, QByteArray, QDataStream, QIODevice, QSize
-from PyQt5.QtGui import QPixmap, QDrag, QMouseEvent, QDragMoveEvent, QDragLeaveEvent, QDragEnterEvent
+from PyQt5.QtGui import QPixmap, QDrag, QMouseEvent, QDragMoveEvent, QDragLeaveEvent, QDragEnterEvent, QImage
 from typing import List, Dict, Union
 from sim_base_class import SimBaseClass
 #from SimStandardModules.SimScope import *
@@ -18,7 +18,8 @@ class SimElementItem(QFrame):
     def __init__(self, parent, sim_element_type: SimBaseClass):
         super(SimElementItem, self).__init__(parent)
         self.element_type = sim_element_type
-        self.pixmap = QPixmap(self.element_type.get_img_path()).scaled(50, 50)
+        #self.pixmap = QPixmap(self.element_type.get_img_path()).scaled(50, 50)
+        self.pixmap = QPixmap(QImage.fromData(self.element_type.get_base_img_as_byte_data(50, 50)))
 
     def __str__(self):
         return 'sim_item: ' + self.element_type.get_name()

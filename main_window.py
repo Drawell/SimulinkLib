@@ -2,6 +2,7 @@ import sys
 import os.path
 from PyQt5.QtWidgets import * #QMainWindow, QWidget, QHBoxLayout, QDockWidget, QMenuBar, QAction, QListView
 from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtGui import QImage
 from sim_element_list import SimElementListModel, SimElementListView
 from view_widget import ViewWidget
 from environment import Environment
@@ -90,5 +91,6 @@ class GeneralWindow(QMainWindow):
         '''
 
         self.env_manager.add_class_by_name(name, x, y)
-        self.view_widget.draw_pixmap(self.environment.draw_qpixmap())
+        #self.view_widget.draw_pixmap(self.environment.draw_qpixmap())
+        self.view_widget.draw_image(QImage.fromData(self.environment.get_img_as_byte_data()))
         self.update()

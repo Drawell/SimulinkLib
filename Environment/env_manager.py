@@ -1,8 +1,6 @@
-from typing import Dict
 import importlib.util
 import os
-from sim_base_class import SimBaseClass
-from environment import Environment
+from Environment.environment import Environment
 
 ## @package env_maneger
 #  Содержит импортированные классы, которые можно добавить.
@@ -46,5 +44,5 @@ class EnvManager:
 
     def add_class_by_name(self, class_name: str, x: int = 0, y: int = 0):
         if class_name in self.imported_classes.keys():
-            element = self.imported_classes[class_name](x, y)
+            element = self.imported_classes[class_name](x - self.environment.x, y - self.environment.y)
             self.environment.add_element(element)

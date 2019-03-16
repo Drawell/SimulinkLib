@@ -1,18 +1,17 @@
-import sys
 import os.path
 from PyQt5.QtWidgets import * #QMainWindow, QWidget, QHBoxLayout, QDockWidget, QMenuBar, QAction, QListView
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QImage
-from sim_element_list import SimElementListModel, SimElementListView
-from view_widget import ViewWidget
-from environment import Environment
-from env_manager import EnvManager
+from PyQtGUI.sim_element_list import SimElementListModel, SimElementListView
+from PyQtGUI.view_widget import ViewWidget
+from Environment.environment import Environment
+from Environment.env_manager import EnvManager
 
 
 class GeneralWindow(QMainWindow):
     def __init__(self):
         super(GeneralWindow, self).__init__(None)
-        self.environment = Environment()
+        self.environment = Environment(500, 500)
         self.env_manager = EnvManager(self.environment)
         self.init_component()
         self.show()
@@ -24,7 +23,7 @@ class GeneralWindow(QMainWindow):
         self.setCentralWidget(QWidget(self))
         self.centralWidget().setLayout(self.main_layout)
 
-        self.view_widget = ViewWidget(self)
+        self.view_widget = ViewWidget(self, self.environment)
         self.view_widget.add_element_signal.connect(self.add_element_by_name)
 
         self.main_layout.addWidget(self.view_widget)
@@ -56,7 +55,7 @@ class GeneralWindow(QMainWindow):
         self.class_model = SimElementListModel(self.sim_elem_dock)
         list_view.setModel(self.class_model)
 
-        path = os.path.join(os.path.dirname(__file__), 'SimStandardModules')
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SimStandardModules')
         self.env_manager.import_classes_from_dir(path)
         self.class_model.setData(0, self.env_manager.imported_classes)
 
@@ -91,6 +90,5 @@ class GeneralWindow(QMainWindow):
         '''
 
         self.env_manager.add_class_by_name(name, x, y)
-        #self.view_widget.draw_pixmap(self.environment.draw_qpixmap())
-        self.view_widget.draw_image(QImage.fromData(self.environment.get_img_as_byte_data()))
+        self.view_widget.update()
         self.update()

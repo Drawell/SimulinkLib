@@ -1,33 +1,12 @@
 from abc import ABC, abstractmethod
+from SimElement.sim_socket import InputSocket, OutputSocket
 from SimElement.element_part_enum import ElementPartEnum as EPE
 from SimElement.sim_box import SimBox
-from SimElement.sim_util import TextSizeHelper
-from SimPainter.sim_painter import SimPainter
+from SimPainter import SimPainter
 
 part_map = [[EPE.TOP_LEFT, EPE.TOP, EPE.TOP_RIGHT],
             [EPE.LEFT, EPE.CENTER, EPE.RIGHT],
             [EPE.BOTTOM_LEFT, EPE.BOTTOM, EPE.BOTTOM_RIGHT]]
-
-'''
-def paint_function(func):
-    def wrapped(self, w: int, h: int, cr=None) -> cairo.ImageSurface:
-        (x, y, width, height, dx, dy) = TextSizeHelper.get_text_size(self.name, self.font)
-        width = int(max(w, width))
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, int(h + height + 4))
-        cr = cairo.Context(surface)
-        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        cr.set_font_size(self.font)
-        cr.move_to(0, h + self.font)
-        cr.show_text(self.name)
-
-        #base_surface = self.__class__.get_base_img_as_surface(w, h)  # int(w - w/4), int(h - h/4))
-        #cr.set_source_surface(base_surface, 0, 0)
-        #cr.paint()
-        func(self, w, h, cr)
-        return surface
-
-    return wrapped
-'''
 
 
 class SimBaseClass(SimBox, ABC):
@@ -36,14 +15,18 @@ class SimBaseClass(SimBox, ABC):
         height = kwargs['height'] if 'height' in kwargs else 50
         super().__init__(x, y, width, height)
         self.name = kwargs['name'] if 'name' in kwargs else self.get_name()
-        self.input_sockets = []
+        self.__input_sockets__ = []
+        self.__output_sockets__ = []
         self.font = 10
+        self.radius_for_resize = 3
 
     def resize(self, w: int, h: int):
         super().resize(max(w, 32), max(h, 32))
+        self.__set_sockets_to_positions__()
 
     def move_to(self, x: int, y: int):
         super().move_to(x, y)
+        self.__set_sockets_to_positions__()
 
     @abstractmethod
     def make_step(self, time: float):
@@ -58,56 +41,13 @@ class SimBaseClass(SimBox, ABC):
     def paint_base(painter: SimPainter, x: float = 0, y: float = 0, w: float = 32, h: float = 32):
         pass
 
-    @abstractmethod
     def paint(self, painter: SimPainter, x_indent: float = 0, y_indent: float = 0, scale: float = 1):
         pass
 
-    '''
-    @staticmethod
-    def get_base_img_as_surface(w: int, h: int):
-        pass
-
-    @staticmethod
-    def get_base_img_as_byte_data(w: int, h: int):
-        pass
-    
-    @staticmethod
-    def get_data_from_surface(surface)-> bytes:
-
-        with BytesIO() as b:
-            surface.write_to_png(b)
-            b.seek(0)
-            data = b.read()
-
-        return data
-
-    #@abstractmethod
-    def get_img_as_surface(self, w: int, h: int) -> cairo.ImageSurface:
-        (x, y, width, height, dx, dy) = TextSizeHelper.get_text_size(self.name, self.font)
-        width = int(max(w, width))
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, int(h + height + 4))
-        cr = cairo.Context(surface)
-        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        cr.set_font_size(self.font)
-
-        cr.move_to(0, h + self.font)
-        cr.show_text(self.name)
-
-        base_surface = self.__class__.get_base_img_as_surface(w, h)  # int(w - w/4), int(h - h/4))
-        cr.set_source_surface(base_surface, 0, 0)
-        cr.paint()
-
-        return surface
-
-    def get_img_as_byte_data(self, w: int, h: int):
-        surface = self.get_img_as_surface(w, h)
-        return SimBaseClass.get_data_from_surface(surface)
-    '''
-
     def in_element(self, x: int, y: int)-> EPE:
-        radius = 5
-        if self.x + self.width + radius < x or x < self.x - radius \
-                or self.y + self.height + radius < y or y < self.y - radius:
+        radius = self.radius_for_resize
+        if self.x + self.width < x or x < self.x \
+                or self.y + self.height < y or y < self.y:
             return EPE.NONE
 
         top = abs(y - self.y) < radius
@@ -120,3 +60,55 @@ class SimBaseClass(SimBox, ABC):
 
         return part_map[x][y]
 
+    def input_sockets_iter(self):
+        return self.__input_sockets__.__iter__()
+
+    def output_sockets_iter(self):
+        return self.__output_sockets__.__iter__()
+
+    def input_sockets_count(self):
+        return len(self.__input_sockets__)
+
+    def output_sockets_count(self):
+        return len(self.__output_sockets__)
+
+    def new_input_socket(self):
+        socket = InputSocket()
+        self.__input_sockets__.append(socket)
+        self.__set_sockets_to_positions__()
+        return socket
+
+    def new_output_socket(self):
+        socket = OutputSocket()
+        self.__output_sockets__.append(socket)
+        self.__set_sockets_to_positions__()
+        return socket
+
+    def __set_sockets_to_positions__(self):
+        step = self.height / (self.input_sockets_count() + 1)
+        y = step
+        for i, s in enumerate(self.__input_sockets__):
+            s.move_to(self.x - 10, self.y + y - 5)
+            y += step
+
+        step = self.height / (self.output_sockets_count() + 1)
+        y = step
+        for i, s in enumerate(self.__output_sockets__):
+            s.move_to(self.x + self.width, self.y + y - 5)
+            y += step
+
+
+def paint_func(func):
+    def wrapped(self: SimBaseClass, painter: SimPainter, x_indent: float = 0, y_indent: float = 0, scale: float = 1):
+        painter.set_pen_width(3)
+
+        for s in self.input_sockets_iter():
+            s.paint(painter, x_indent, y_indent, scale)
+
+        for s in self.output_sockets_iter():
+            s.paint(painter, x_indent, y_indent, scale)
+
+        painter.set_pen_width(1)
+        func(self, painter, x_indent, y_indent, scale)
+
+    return wrapped

@@ -1,5 +1,4 @@
-import os.path
-from SimElement.sim_base_class import SimBaseClass
+from SimElement.sim_base_class import SimBaseClass, paint_func
 from SimPainter.sim_painter import SimPainter
 
 
@@ -19,6 +18,7 @@ class SimTmp(SimBaseClass):
         painter.draw_rectangle(x + 1, y + 1, w - 2, h - 2)
         painter.draw_text(x + w/10, y + h/2 + h / 5, "Hi!", int(min(h*2/3, w * 2/3)))
 
+    @paint_func
     def paint(self, painter: SimPainter, x_indent: float = 0, y_indent: float = 0, scale: float = 1):
         SimTmp.paint_base(painter, self.x + x_indent, self.y + y_indent, self.width, self.height)
         painter.draw_text(self.x + x_indent, self.y + y_indent + self.height + self.font, self.name, self.font)

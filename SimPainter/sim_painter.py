@@ -6,6 +6,14 @@ class SimPainter(ABC):
         pass
 
     @abstractmethod
+    def set_pen_width(self, width):
+        pass
+
+    @abstractmethod
+    def set_pen_colour(self, r:int, g:int, b:int):
+        pass
+
+    @abstractmethod
     def draw_rectangle(self, x: float, y: float, w: float, h: float):
         pass
 

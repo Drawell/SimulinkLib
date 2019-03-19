@@ -1,5 +1,5 @@
 from SimPainter.sim_painter import SimPainter
-from PyQt5.QtGui import QPixmap, QPainter, QFont, QPainterPath
+from PyQt5.QtGui import QPixmap, QPainter, QFont, QPainterPath, QPen, QColor
 from PyQt5.QtCore import Qt
 
 
@@ -9,6 +9,16 @@ class SimQtPainter(SimPainter):
         self.canvas = QPixmap(width, height)
         self.canvas.fill(Qt.white)
         self.painter = QPainter(self.canvas)
+        self.pen = QPen(Qt.black)
+        self.painter.setPen(self.pen)
+
+    def set_pen_width(self, width):
+        self.pen.setWidth(width)
+        self.painter.setPen(self.pen)
+
+    def set_pen_colour(self, r: int, g: int, b: int):
+        self.pen.setColor(QColor(r, g, b))
+        self.painter.setPen(self.pen)
 
     def draw_rectangle(self, x: float, y: float, w: float, h: float):
         self.painter.drawRect(x, y, w, h)

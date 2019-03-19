@@ -2,6 +2,7 @@ import sys
 import cairo
 from io import BytesIO
 from abc import abstractmethod
+from enum import Enum
 
 from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QFrame
@@ -11,7 +12,7 @@ from PyQtGUI.view_widget import ViewWidget
 from Environment.environment import Environment
 from SimStandardModules.SimTmp import SimTmp
 from SimStandardModules.SimScope import SimScope
-from SimPainter.cairo_painter import CairoPainter
+from SimPainter.cairo_painter import SimCairoPainter
 
 class V(QWidget):
     def __init__(self, parent, canvas):
@@ -46,7 +47,7 @@ class TmpWindow(QMainWindow):
 
         self.painter = QPainter()
 
-        self.cairo_painter = CairoPainter(200, 200)
+        self.cairo_painter = SimCairoPainter(200, 200)
 
         s = SimTmp(50, 50, name="Name")
         self.env.add_element(s)
@@ -64,87 +65,25 @@ class TmpWindow(QMainWindow):
         self.painter.end()
         '''
 
-class Soket:
-    def __init__(self, name):
-        self.name = name
-
-    def print(self):
-        print(self.name)
-
-class SockDec:
-    def __init__(self, function):
-        self.function = function
-        self.arr = []
-
-    def __call__(self, *params):
-        self.function(params)
-        self.arr.append(1)
-
-@SockDec
-def func(*params):
-    print("i am func")
-
-@SockDec
-def f2(*params):
-    print("f2")
-
-#func()
-#f2()
-#f2()
-
 class A:
-    def __init__(self):
-        self.a = Soket("hi")
-        self.b = Soket("B socket")
-        self.sockets = []
-        self.value = 0
+    pass
 
-    def socket(func):
-        print("socket")
-        # init
-        def decorator(self):
-            #call
-            #q.sockets.append(func(q))
-            print("decorator")
-            def wrapped(self):
-                print(self.arr)
-                func(self)
+class B(A):
+    pass
 
-            return wrapped
+b = B()
+print(issubclass(type(b), A))
 
-        return decorator
+class En(Enum):
+    a=False
+    b=True
+    c=False
 
-    def socket2(arg1, arg2):
-        print(arg1, arg2)
-        def decorator(func):
-            #q.sockets.append(func(q))
-            print("decorator")
-            def wrapped(self):
-                print(self.arr)
-                func(self)
-
-            return wrapped
-
-        return decorator
-
-    @socket
-    def socket_func(self):
-        return self.a
-
-    @socket2(1, 2)
-    def socket_func_2(self):
-        return self.b
-
-    def print_sockets(self):
-        for s in self.sockets:
-            s.print()
-
-
-a = A()
-a.socket_func()
-a.print_sockets()
-
-
+q = En.a
+if q:
+    print('qwer')
+else:
+    print("no")
 def main():
     app = QApplication(sys.argv)
     window = TmpWindow()

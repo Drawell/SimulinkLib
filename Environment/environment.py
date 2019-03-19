@@ -1,7 +1,9 @@
-import cairo
 from SimElement.sim_base_class import SimBaseClass
-from SimElement.element_part_enum import ElementPartEnum
+from SimElement.element_part_enum import ElementPartEnum as EPE
+from SimElement.sim_connection import SimConnection
+from SimElement.sim_box import SimBox
 from SimPainter.sim_painter import SimPainter
+
 
 ## @package environment
 #  Среда. В ней будет все
@@ -13,7 +15,7 @@ class Environment(SimBaseClass):
     def __init__(self, x: int, y: int):
         super().__init__(0, 0, {})
         self.present_elements = []
-        #self.present_elements_surfaces = []
+        self.present_connections = []
         self.target_x = 0
         self.target_y = 0
 
@@ -29,44 +31,10 @@ class Environment(SimBaseClass):
 
     def paint(self, painter: SimPainter, x_indent: float = 0, y_indent: float = 0, scale: float = 1):
         painter.clear()
-        for i, element in enumerate(self.present_elements):
+        for element in self.present_elements:
             element.paint(painter, self.x, self.y, scale)
-
-
-
-    '''
-    def get_img_as_surface(self, w: int = 0, h: int = 0):
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
-        cr = cairo.Context(surface)
-
-        start_time = time.time()
-        dirty_time = time.time()
-        dirty_time_sum = 0
-        for i, element in enumerate(self.present_elements):
-            if element.dirty or self.present_elements_surfaces[i] is None:
-                self.present_elements_surfaces[i] = element.get_img_as_surface(element.width, element.height)
-                element.dirty = False
-                dirty_time_sum += time.time() - dirty_time
-                dirty_time = time.time()
-
-            element_surface = self.present_elements_surfaces[i]
-            cr.set_source_surface(element_surface, element.x, element.y)
-            cr.paint()
-        second_time = time.time()
-
-        targeted_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
-        cr = cairo.Context(targeted_surface)
-        cr.set_source_surface(surface, self.x, self.y)
-        cr.paint()
-        print(" %.4f element | --- %.4f dirty | --- %.4f surfaces " %
-              (time.time() - start_time, dirty_time_sum, time.time() - second_time))
-
-        return targeted_surface
-            
-    def get_img_as_byte_data(self, w: int = 0, h: int = 0):
-        surface = self.get_img_as_surface(self.width, self.height)
-        return SimBaseClass.get_data_from_surface(surface)
-    '''
+        for connection in self.present_connections:
+            connection.paint(painter, self.x, self.y, scale)
 
     def add_element(self, element: SimBaseClass):
         self.present_elements.append(element)
@@ -74,11 +42,89 @@ class Environment(SimBaseClass):
         self.height = max(element.y + element.height, self.height)
         self.dirty = True
 
+    def add_connection(self, connection: SimConnection):
+        self.present_connections.append(connection)
+        self.dirty = True
+
+    def try_to_connect(self, sender: SimConnection):
+        # connect input socket
+        print("start connection")
+        box = sender.end_box
+        input_socket = self.find_input_socket_by_coord(
+            [(box.x, box.y), (box.x + box.width, box.y),
+             (box.x, box.y + box.height), (box.x + box.width, box.y + box.height)])
+
+        print('input socket: ', input_socket)
+
+        # connect output socket
+        box = sender.start_box
+        output_socket = self.find_output_socket_by_coord(
+            [(box.x, box.y), (box.x + box.width, box.y),
+             (box.x, box.y + box.height), (box.x + box.width, box.y + box.height)])
+
+        print('output socket: ', output_socket)
+
+        if output_socket is None:  # start is disconnected
+            if sender.get_end_socket() is not None:  # end connected -> unbinding
+                sender.get_end_socket().unbind()
+            sender.set_start_socket(None)
+        else:
+            # start is connected -> set start socket
+            sender.set_start_socket(output_socket)
+
+        if input_socket is None:  # end is dis connected
+            if sender.end_socket is not None:  # but steel exists -> unbinding
+                sender.get_end_socket().unbind()
+                sender.set_end_socket(None)
+        else:
+            sender.set_end_socket(input_socket)
+
+        if input_socket is not None and output_socket is not None:
+            # start is connected and end is connected -> binding
+            input_socket.bind_with(output_socket)
+
+        print('Connection: Start socket: ', sender.get_start_socket(), '; End socket: ', sender.get_end_socket())
+
+    def disconnect_from_end(self, sender: SimConnection):
+        pass
+
+    def disconnect_from_start(self, sender: SimConnection):
+        pass
+
     def get_element_by_coord(self, x, y):
         for element in self.present_elements:
             part = element.in_element(x - self.x, y - self.y)
-            if part != ElementPartEnum.NONE:
+            if part != EPE.NONE:
                 return element, part
 
-            # check for sockets
+        for connection in self.present_connections:
+            if connection.start_box.in_element(x - self.x, y - self.y) != EPE.NONE:
+                return connection, connection.start_box
+            elif connection.end_box.in_element(x - self.x, y - self.y) != EPE.NONE:
+                return connection, connection.end_box
+
+        socket = self.find_output_socket_by_coord([(x - self.x, y - self.y)])
+        if socket is not None:
+            return socket, None
+
+        socket = self.find_input_socket_by_coord([(x - self.x, y - self.y)])
+        if socket is not None:
+            return socket, None
+
         return None, None
+
+    def find_input_socket_by_coord(self, list_of_coord: list):
+        for element in self.present_elements:
+            for socket in element.input_sockets_iter():
+                for x, y in list_of_coord:
+                    if socket.in_element(x - self.x, y - self.y) != EPE.NONE:
+                        return socket
+        return None
+
+    def find_output_socket_by_coord(self, list_of_coord: list):
+        for element in self.present_elements:
+            for socket in element.output_sockets_iter():
+                for x, y in list_of_coord:
+                    if socket.in_element(x - self.x, y - self.y) != EPE.NONE:
+                        return socket
+        return None

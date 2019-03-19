@@ -153,5 +153,6 @@ class ViewWidget(QWidget):
 
     def mouseReleaseEvent(self, e: QMouseEvent):
         self.mouse_pressed = False
+        self.strategy.mouse_up(e.x(), e.y())
         self.strategy = self.strategy_manager.get_default_strategy()
         self.update()

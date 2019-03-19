@@ -10,6 +10,12 @@ class SimCairoPainter(SimPainter):
         self.cr = cairo.Context(self.surface)
         self.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
+    def set_pen_width(self, width: int):
+        self.cr.set_line_width(width)
+
+    def set_pen_colour(self, r: int, g: int, b: int):
+        self.cr.set_source_rgb(r, g, b)
+
     def draw_rectangle(self, x: float, y: float, w: float, h: float):
         self.cr.rectangle(x, y, w, h)
         self.cr.stroke()

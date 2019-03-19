@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
-from SimElement.sim_base_class import SimBaseClass
+from abc import ABC
+from SimElement.sim_box import SimBox
 
 
 class BaseStrategy(ABC):
-    def __init__(self, element: SimBaseClass):
+    def __init__(self, element: SimBox):
         self.element = element
         self.prev_x = 0
         self.prev_y = 0

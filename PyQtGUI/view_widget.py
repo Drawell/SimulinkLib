@@ -2,11 +2,10 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QDataStream, QIODevice, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QDropEvent, QDragEnterEvent, QDragMoveEvent, QDragLeaveEvent, QMouseEvent
 
-from ToolsStrategies.strategy_manager import StrategyManager
-from Environment.environment import Environment
-from SimElement.element_part_enum import ElementPartEnum as EPE
-from SimPainter.cairo_painter import SimCairoPainter
-from SimPainter.qt_painter import SimQtPainter
+from ToolsStrategies import StrategyManager
+from Environment import Environment, EnvManager
+from PySimCore import ElementPartEnum as EPE
+from SimPainter import SimCairoPainter, SimQtPainter
 
 import time
 
@@ -15,11 +14,10 @@ class ViewWidget(QWidget):
 
     add_element_signal = pyqtSignal(str, int, int)
 
-    def __init__(self, parent, env: Environment):
+    def __init__(self, parent, env_manager: EnvManager):
         super(ViewWidget, self).__init__(parent)
-        self.env = env
-        self.strategy_manager = StrategyManager(self.env)
-        self.strategy = self.strategy_manager.get_default_strategy()
+        self.env_manager = env_manager
+        self.strategy = StrategyManager.get_default_strategy(self.env)
 
         self.canvas = QPixmap(500, 500)  # this present size canvas
         self.canvas.fill(Qt.white)
@@ -35,6 +33,10 @@ class ViewWidget(QWidget):
         self.setMouseTracking(True)
         self.mouse_pressed = False
         self.show()
+
+    @property
+    def env(self):
+        return self.env_manager.environment
 
     def change_mouse_cursor(self, part: EPE):
         if part is None or part == EPE.NONE:
@@ -89,7 +91,7 @@ class ViewWidget(QWidget):
             else:
                 start_time = time.time()
                 self.env.paint(self.qt_painter)
-                print(" %.6f - painting " % (time.time() - start_time))
+                #print(" %.6f - painting " % (time.time() - start_time))
                 self.draw_pixmap(self.qt_painter.get_pixmap())
 
             self.env.dirty = False
@@ -130,7 +132,7 @@ class ViewWidget(QWidget):
             item_data = event.mimeData().data('application/x-simitemdata')
             data_stream = QDataStream(item_data, QIODevice.ReadOnly)
             s = data_stream.readQString()
-            print(s, event.pos().x(), event.pos().y())
+            #print(s, event.pos().x(), event.pos().y())
             self.add_element_signal.emit(s, event.pos().x(), event.pos().y())
             event.acceptProposedAction()
         else:
@@ -138,7 +140,7 @@ class ViewWidget(QWidget):
 
     def mousePressEvent(self, e: QMouseEvent):
         self.mouse_pressed = True
-        self.strategy, part = self.strategy_manager.get_strategy(e.x(), e.y())
+        self.strategy, part = StrategyManager.get_strategy(self.env, e.x(), e.y())
         self.env.dirty = True
         self.change_mouse_cursor(part)
         self.update()
@@ -154,5 +156,5 @@ class ViewWidget(QWidget):
     def mouseReleaseEvent(self, e: QMouseEvent):
         self.mouse_pressed = False
         self.strategy.mouse_up(e.x(), e.y())
-        self.strategy = self.strategy_manager.get_default_strategy()
+        self.strategy = StrategyManager.get_default_strategy(self.env)
         self.update()

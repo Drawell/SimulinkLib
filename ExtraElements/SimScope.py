@@ -1,5 +1,4 @@
-from SimElement import SimBaseClass, paint_func
-from SimPainter.sim_painter import SimPainter
+from PySimCore import SimBaseClass, paint_func, SimPainter
 
 
 class SimScope(SimBaseClass):
@@ -10,7 +9,10 @@ class SimScope(SimBaseClass):
     def get_name()->str:
         return 'SimScope'
 
-    def make_step(self, time: float):
+    def init_simulation(self, context):
+        pass
+
+    def iterate(self, time: float, context):
         pass
 
     @staticmethod
@@ -19,7 +21,7 @@ class SimScope(SimBaseClass):
         painter.draw_rectangle(x + w / 8, y + h / 8, w - w / 4, h/3)
 
     @paint_func
-    def paint(self, painter: SimPainter, x_indent: float = 0, y_indent: float = 0, scale: float = 1):
-        SimScope.paint_base(painter, self.x + x_indent, self.y + y_indent, self.width, self.height)
-        painter.draw_text(self.x + x_indent, self.y + y_indent + self.height + self.font, self.name, self.font)
+    def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
+        SimScope.paint_base(painter, x, y, self.width, self.height)
+        #painter.draw_text(x, y + self.height + self.font, self.name, self.font)
 

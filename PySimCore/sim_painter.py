@@ -22,6 +22,10 @@ class SimPainter(ABC):
         pass
 
     @abstractmethod
+    def draw_circle(self, x: float, y: float, r: float):
+        pass
+
+    @abstractmethod
     def draw_text(self, x: float, y: float, text: str, font_size: int):
         pass
 

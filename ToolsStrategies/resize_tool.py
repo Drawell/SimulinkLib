@@ -1,6 +1,5 @@
-from ToolsStrategies.base_strategy import BaseStrategy
-from SimElement.sim_base_class import SimBaseClass
-from SimElement.element_part_enum import ElementPartEnum as EPE
+from ToolsStrategies import BaseStrategy
+from PySimCore import SimBaseClass, ElementPartEnum as EPE
 
 
 class ResizeTool(BaseStrategy):

@@ -1,7 +1,6 @@
-from ToolsStrategies.base_strategy import BaseStrategy
-from SimElement.sim_base_class import SimBaseClass
-from SimElement.element_part_enum import ElementPartEnum as EPE
-from Environment.environment import Environment
+from ToolsStrategies import BaseStrategy
+from Environment import Environment
+
 
 class ObserverTool(BaseStrategy):
     def __init__(self, element: Environment):

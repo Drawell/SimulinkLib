@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QFrame, QListView, QAbstractItemView
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QVariant, QMimeData, QByteArray, QDataStream, QIODevice, QSize
 from PyQt5.QtGui import QPixmap, QDrag, QMouseEvent, QDragMoveEvent, QDragLeaveEvent, QDragEnterEvent, QImage
-from SimElement.sim_base_class import SimBaseClass
-from SimPainter.qt_painter import SimQtPainter
+from PySimCore import SimBaseClass
+from SimPainter import SimQtPainter
 
 ## @package sim_element_list
 #  Описывает виджет для просмотра, модель данных и элемент этих самых данных

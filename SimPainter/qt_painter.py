@@ -1,4 +1,4 @@
-from SimPainter.sim_painter import SimPainter
+from PySimCore import SimPainter
 from PyQt5.QtGui import QPixmap, QPainter, QFont, QPainterPath, QPen, QColor
 from PyQt5.QtCore import Qt
 
@@ -25,6 +25,9 @@ class SimQtPainter(SimPainter):
 
     def draw_line(self, x1: float, y1: float, x2: float, y2: float):
         self.painter.drawLine(x1, y1, x2, y2)
+
+    def draw_circle(self, x: float, y: float, r: float):
+        self.painter.drawEllipse(x - r, y - r, 2 * r, 2 * r)
 
     def draw_text(self, x: float, y: float, text: str, font_size: int):
         self.painter.setFont(QFont("Sans", font_size))

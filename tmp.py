@@ -1,23 +1,17 @@
 import sys
-import cairo
-from io import BytesIO
-from abc import abstractmethod
-from enum import Enum
 
 from PyQt5.QtGui import QPixmap, QImage, QPainter
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QFrame
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout
 from PyQt5.QtCore import Qt
-from PyQtGUI.view_widget import ViewWidget
 
-from Environment.environment import Environment
-from SimStandardModules.SimTmp import SimTmp
-from SimStandardModules.SimScope import SimScope
-from SimPainter.cairo_painter import SimCairoPainter
+from Environment import Environment, EnvManager
+from ExtraElements.SimTmp import SimTmp
+from SimStandardElements.SimAdd import SimAdd
+from SimStandardElements.SimConst import SimConst
+from SimStandardElements.SimSetVariable import SimSetVariable
 
-class V(QWidget):
-    def __init__(self, parent, canvas):
-        super(V, self).__init__(parent)
-        self.show()
+from SimPainter import SimCairoPainter, SimQtPainter
+
 
 class TmpWindow(QMainWindow):
     def __init__(self):
@@ -29,7 +23,8 @@ class TmpWindow(QMainWindow):
         self.centralWidget().show()
 
     def init_component(self):
-        self.env = Environment(200, 200)
+        self.env = Environment(0, 0, 200, 200, 'a')
+        self.env_manager = EnvManager(self.env)
 
         self.main_layout = QHBoxLayout(self)
         self.setCentralWidget(QWidget(self))
@@ -47,43 +42,89 @@ class TmpWindow(QMainWindow):
 
         self.painter = QPainter()
 
-        self.cairo_painter = SimCairoPainter(200, 200)
+        self.cairo_painter = SimQtPainter(500, 500)#SimCairoPainter(200, 200)
 
-        s = SimTmp(50, 50, name="Name")
-        self.env.add_element(s)
+        add = SimAdd(100, 100, signs='+-+')
+        self.env_manager.add_element(add)
+        const1 = SimConst(20, 50, value=5)
+        self.env_manager.add_element(const1)
+        const2 = SimConst(20, 100, value=7)
+        self.env_manager.add_element(const2)
+        const3 = SimConst(20, 150, value=4)
+        self.env_manager.add_element(const3)
+
+        out = SimSetVariable(200, 100, var_name='v')
+        self.env_manager.add_element(out)
+
+        print(self.env.connect(const1, const1.output, add, add.inputs[0]))
+        print(self.env.connect(const2, const2.output, add, add.inputs[1]))
+        print(self.env.connect(const3, const3.output, add, add.inputs[2]))
+        print(self.env.connect(add, add.output, out, out.input))
+
+        context = {}
+
+        self.env_manager.run_simulation(0, 1, 1, context)
+        print(context['v'])
+
         self.env.paint(self.cairo_painter)
-        self.im = QImage.fromData(self.cairo_painter.get_image_as_byte_data())
-
+        #self.im = QImage.fromData(self.cairo_painter.get_image_as_byte_data())
+        self.px = self.cairo_painter.get_pixmap()
 
     def paintEvent(self, *args, **kwargs):
         p = QPainter(self)
-        #p.drawPixmap(0,0, )
-        p.drawImage(0,0, self.im)
+        p.drawPixmap(0,0, self.px)
+        #p.drawImage(0,0, self.im)
         '''
         self.painter.begin(self.view_widget)
         self.painter.drawPixmap(0,0, self.canvas)
         self.painter.end()
         '''
 
+aa = {'a': [1, 2], 'b': []}
+bb = {'a': [], 'b': [1]}
+cc = {'a': [], 'b': []}
+for key in cc.keys():
+    cc[key].extend(bb[key])
+    cc[key].extend(aa[key])
+
+l = [5, 4, 3, 2, 1]
+l.append(l.pop(1))
+
+print(l)
+
+s = '+-+-+'
+for c in s:
+    print(c)
+
+'''
 class A:
-    pass
+    def __init__(self):
+        self.pr = {}
+
+    def print(self):
+        print(self.pr)
 
 class B(A):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.qwer = 'qw'
 
-b = B()
-print(issubclass(type(b), A))
+    @sim_property
+    def a(self):
+        pass
 
-class En(Enum):
-    a=False
-    b=True
-    c=False
+    @sim_property
+    def qwer(self):
+        pass
 
-q = En.a
-if q:
-    print('qwer')
-else:
-    print("no")
+
+c = B()
+c.a = 123
+print(c.a)
+c.a = 44
+c.print()
+'''
+
 def main():
     app = QApplication(sys.argv)
     window = TmpWindow()
@@ -94,8 +135,6 @@ if __name__ == '__main__':
     pass
 
 """
-1) Нормальный импорт модулей
-2) дирректория дирректории файла
-3) get_base_img_as_byte_data
-
+    1) как запилить изменение объектов при изменении типа? составной элемент
+    
 """

@@ -1,5 +1,5 @@
-from SimElement.sim_base_class import SimBaseClass, paint_func
-from SimPainter.sim_painter import SimPainter
+from PySimCore.sim_base_class import SimBaseClass, paint_func
+from PySimCore.sim_painter import SimPainter
 
 
 class SimSinWave(SimBaseClass):
@@ -12,7 +12,10 @@ class SimSinWave(SimBaseClass):
     def get_name()->str:
         return 'Sin Wave'
 
-    def make_step(self, time: float):
+    def init_simulation(self, context):
+        pass
+
+    def iterate(self, time: float, context):
         pass
 
     @staticmethod

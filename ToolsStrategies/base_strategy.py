@@ -1,5 +1,5 @@
 from abc import ABC
-from SimElement.sim_box import SimBox
+from PySimCore import SimBox
 
 
 class BaseStrategy(ABC):

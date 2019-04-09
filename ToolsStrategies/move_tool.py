@@ -1,5 +1,5 @@
-from ToolsStrategies.base_strategy import BaseStrategy
-from SimElement.sim_base_class import SimBaseClass
+from ToolsStrategies import BaseStrategy
+from PySimCore import SimBaseClass
 
 
 class MoveTool(BaseStrategy):

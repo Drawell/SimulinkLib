@@ -1,7 +1,8 @@
-from SimPainter.sim_painter import SimPainter
+from PySimCore import SimPainter
 import cairo
 from io import BytesIO
 import time
+
 
 class SimCairoPainter(SimPainter):
     def __init__(self, width: int, height: int):
@@ -24,6 +25,10 @@ class SimCairoPainter(SimPainter):
         self.cr.move_to(x1, y1)
         self.cr.line_to(x2, y2)
         self.cr.stroke()
+
+    def draw_circle(self, x: float, y: float, r: float):
+        self.cr.move_to(x, y)
+        self.cr.arc(x, y, r, 0, 2 * 3.14)
 
     def draw_text(self, x: float, y: float, text: str, font_size: int):
         self.cr.set_font_size(font_size)

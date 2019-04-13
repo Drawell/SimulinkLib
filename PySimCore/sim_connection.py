@@ -1,15 +1,76 @@
 from PySimCore import ElementPartEnum as EPE, SimBox, InputSocket, OutputSocket, SimPainter
+#from PySimCore.sim_composite_element import SimCompositeElement
 import xml.etree.ElementTree as xml
 
 
+# In this class x, y = start_box.x, start_box.y and width, height = end_box.x, end_box.y
+
 class SimConnection(SimBox):
-    def __init__(self, env, x_start: int, y_start: int, x_end, y_end):
+    def __init__(self, cmp, x_start: int, y_start: int, x_end: int, y_end: int):
         super().__init__(x_start, y_start, x_end, y_end)
-        self.env = env
+        self.cmp = cmp
         self.start_box = SimBox(x_start, y_start, 8, 8)
         self.end_box = SimBox(x_end, y_end, 8, 8)
+        #self.radius = 5
         self.output_socket = None
         self.input_socket = None
+
+    def move_to(self, x: int, y: int):  # moving start
+        super().move_to(x, y)
+        self.start_box.move_to(x, y)
+
+        self.output_socket = None
+
+        # try to connect
+        # can connect to output
+        socket = self.cmp.find_output_socket_by_coord([
+            (self.x,                        self.y),
+            (self.x + self.start_box.width, self.y + y),
+            (self.x,                        self.y + self.start_box.height),
+            (self.x + self.start_box.width, self.y + self.start_box.height)])
+
+        #print(socket)
+        if socket is None:
+            return
+
+        self.output_socket = socket
+
+        if self.input_socket is not None:
+            self.input_socket.bind_with(socket)
+
+        self.start_box.move_to(socket.x, socket.y)
+
+    def resize(self, w: int, h: int):
+        super().resize(w, h)
+        self.end_box.move_to(w, h)
+
+        if self.input_socket is not None:
+            self.input_socket.unbind()
+        self.input_socket = None
+
+        # try to connect
+        # can connect to input
+        socket = self.cmp.find_input_socket_by_coord([
+            (self.width,                      self.height),
+            (self.width + self.end_box.width, self.height),
+            (self.width,                      self.height + self.end_box.height),
+            (self.width + self.end_box.width, self.height + self.end_box.height)])
+
+        #print(socket)
+        if socket is None:
+            return
+
+        if socket.output_socket is not None:
+            other_connection, part = self.cmp.find_connection_by_coord(socket.x + socket.size / 2, socket.y + socket.size / 2)
+            if other_connection is not None and part == EPE.END:
+                other_connection.disconnect_from_input()
+
+        self.input_socket = socket
+
+        if self.output_socket is not None:
+            socket.bind_with(self.output_socket)
+
+        self.end_box.move_to(socket.x, socket.y)
 
     def get_start_box(self)->SimBox:
         return self.start_box
@@ -35,8 +96,11 @@ class SimConnection(SimBox):
         # start arrow
         if self.output_socket is not None:
             painter.set_pen_colour(0, 255, 0)
+            #self.x = self.output_socket.x
+            #self.y = self.output_socket.y
             self.start_box.x = self.output_socket.x
             self.start_box.y = self.output_socket.y
+            #self.x, self.y = self.output_socket.x, self.output_socket.y
         else:
             painter.set_pen_colour(255, 0, 0)
 
@@ -49,8 +113,12 @@ class SimConnection(SimBox):
         # end arrow
         if self.input_socket is not None:
             painter.set_pen_colour(0, 255, 0)
+            #self.width = self.input_socket.x
+            #self.height = self.input_socket.y
+
             self.end_box.x = self.input_socket.x
             self.end_box.y = self.input_socket.y
+            #self.width, self.height = self.input_socket.x, self.input_socket.y
         else:
             painter.set_pen_colour(255, 0, 0)
 
@@ -66,17 +134,32 @@ class SimConnection(SimBox):
         painter.draw_line(x1 + 4, y1 + 4, x2 + 4, y2 + 4)
 
     def in_element(self, x: int, y: int) -> EPE:
-        return EPE.NONED
+        if self.start_box.in_element(x, y) != EPE.NONE:
+            return EPE.START
+        if self.end_box.in_element(x, y) != EPE.NONE:
+            return EPE.END
+
+        return EPE.NONE
+
+    def disconnect_from_input(self):
+        # depend of socket position
+
+        self.width, self.height = self.end_box.x, self.end_box.y
+
+        dx, dy = -10, 0
+        self.resize(self.width + dx, self.height + dy)
+        if self.input_socket is not None:
+            self.input_socket.unbind()
+            self.input_socket = None
+
+
+    # need to move
 
     def save_to_xml(self, parent):
         connection_xml = xml.SubElement(parent, 'Connection')
-        self.move_to(self.start_box.x, self.start_box.y)
-        self.resize(self.end_box.x, self.end_box.y)
+        #self.move_to(self.start_box.x, self.start_box.y)
+        #self.resize(self.end_box.x, self.end_box.y)
         super().save_to_xml(connection_xml)
-        #start_box_xml = xml.SubElement(connection_xml, 'StartBox')
-        #self.start_box.save_to_xml(start_box_xml)
-        #end_box_xml = xml.SubElement(connection_xml, 'EndBox')
-        #self.end_box.save_to_xml(end_box_xml)
 
         start_socket_xml = xml.SubElement(connection_xml, 'StartSocket')
         if self.input_socket is None:
@@ -95,7 +178,3 @@ class SimConnection(SimBox):
             name_xml.text = self.input_socket.name
             index_xml = xml.SubElement(end_socket_xml, 'index')
             index_xml.text = str(self.input_socket.index)
-
-    @staticmethod
-    def parse_xml(element):
-        pass

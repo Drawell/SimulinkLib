@@ -4,7 +4,8 @@ from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout
 from PyQt5.QtCore import Qt
 
-from Environment import Environment, EnvManager
+from Environment import Environment
+from PySimCore import SimCompositeElement
 from ExtraElements.SimTmp import SimTmp
 from SimStandardElements.SimAdd import SimAdd
 from SimStandardElements.SimConst import SimConst
@@ -23,8 +24,8 @@ class TmpWindow(QMainWindow):
         self.centralWidget().show()
 
     def init_component(self):
-        self.env = Environment(0, 0, 200, 200, 'a')
-        self.env_manager = EnvManager(self.env)
+       # self.cmp = SimC(200, 200, 'a')
+        self.env = Environment()
 
         self.main_layout = QHBoxLayout(self)
         self.setCentralWidget(QWidget(self))
@@ -45,25 +46,27 @@ class TmpWindow(QMainWindow):
         self.cairo_painter = SimQtPainter(500, 500)#SimCairoPainter(200, 200)
 
         add = SimAdd(100, 100, signs='+-+')
-        self.env_manager.add_element(add)
+        self.env.add_element(add)
         const1 = SimConst(20, 50, value=5)
-        self.env_manager.add_element(const1)
+        self.env.add_element(const1)
         const2 = SimConst(20, 100, value=7)
-        self.env_manager.add_element(const2)
+        self.env.add_element(const2)
         const3 = SimConst(20, 150, value=4)
-        self.env_manager.add_element(const3)
+        self.env.add_element(const3)
 
         out = SimSetVariable(200, 100, var_name='v')
-        self.env_manager.add_element(out)
+        self.env.add_element(out)
 
-        print(self.env.connect(const1, const1.output, add, add.inputs[0]))
-        print(self.env.connect(const2, const2.output, add, add.inputs[1]))
-        print(self.env.connect(const3, const3.output, add, add.inputs[2]))
-        print(self.env.connect(add, add.output, out, out.input))
+        self.cmp = self.env.cmp
+
+        print(self.cmp.connect(const1, const1.output, add, add.inputs[0]))
+        print(self.cmp.connect(const2, const2.output, add, add.inputs[1]))
+        print(self.cmp.connect(const3, const3.output, add, add.inputs[2]))
+        print(self.cmp.connect(add, add.output, out, out.input))
 
         context = {}
 
-        self.env_manager.run_simulation(0, 1, 1, context)
+        self.env.run_simulation(0, 1, 1, context)
         print(context['v'])
 
         self.env.paint(self.cairo_painter)

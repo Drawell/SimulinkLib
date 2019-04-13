@@ -44,8 +44,8 @@ class SimAdd(SimBaseClass):
         painter.set_pen_width(1)
         painter.draw_rectangle(x + 1, y + 1, w - 2, h - 2)
         painter.set_pen_width(3)
-        painter.draw_line(x + w/2, y + h/6, x + w/2, y + h * 5/6)
-        painter.draw_line(x + w/6, y + h/2, x + w * 5/6, y + h/2)
+        painter.draw_line(x + w/2, y + h/5, x + w/2, y + h * 4/5)
+        painter.draw_line(x + w/5, y + h/2, x + w * 4/5, y + h/2)
 
     @paint_func
     def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):

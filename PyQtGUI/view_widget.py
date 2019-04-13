@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QDataStream, QIODevice, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QDropEvent, QDragEnterEvent, QDragMoveEvent, QDragLeaveEvent, QMouseEvent
 
-from ToolsStrategies import StrategyManager
-from Environment import Environment, EnvManager
+from ToolsStrategies import ToolManager
+from Environment import Environment
 from PySimCore import ElementPartEnum as EPE
 from SimPainter import SimCairoPainter, SimQtPainter
 
@@ -12,12 +12,10 @@ import time
 # на этом виджете будем рсовать
 class ViewWidget(QWidget):
 
-    add_element_signal = pyqtSignal(str, int, int)
-
-    def __init__(self, parent, env_manager: EnvManager):
+    def __init__(self, parent, environment: Environment):
         super(ViewWidget, self).__init__(parent)
-        self.env_manager = env_manager
-        self.strategy = StrategyManager.get_default_strategy(self.env)
+        self.env = environment
+        self.tool = ToolManager(self.env) #.get_default_strategy(self.env)
 
         self.canvas = QPixmap(500, 500)  # this present size canvas
         self.canvas.fill(Qt.white)
@@ -33,10 +31,6 @@ class ViewWidget(QWidget):
         self.setMouseTracking(True)
         self.mouse_pressed = False
         self.show()
-
-    @property
-    def env(self):
-        return self.env_manager.environment
 
     def change_mouse_cursor(self, part: EPE):
         if part is None or part == EPE.NONE:
@@ -72,7 +66,7 @@ class ViewWidget(QWidget):
 
     def paintEvent(self, e):
         #drawing on widget
-        if self.env.dirty:
+        if self.env.cmp.dirty:
             cairo = False
             if cairo:
                 start_time = time.time()
@@ -132,29 +126,30 @@ class ViewWidget(QWidget):
             item_data = event.mimeData().data('application/x-simitemdata')
             data_stream = QDataStream(item_data, QIODevice.ReadOnly)
             s = data_stream.readQString()
-            #print(s, event.pos().x(), event.pos().y())
-            self.add_element_signal.emit(s, event.pos().x(), event.pos().y())
+
+            self.env.add_element_by_name(s, event.pos().x(), event.pos().y())
+            self.update()
+
             event.acceptProposedAction()
         else:
             event.ignore()
 
     def mousePressEvent(self, e: QMouseEvent):
         self.mouse_pressed = True
-        self.strategy, part = StrategyManager.get_strategy(self.env, e.x(), e.y())
-        self.env.dirty = True
-        self.change_mouse_cursor(part)
+        self.tool.mouse_down(e.x(), e.y())
+
         self.update()
 
     def mouseMoveEvent(self, e: QMouseEvent):
         if self.mouse_pressed:
-            self.strategy.mouse_pressed_move(e.x(), e.y())
-            self.env.dirty = True
+            self.tool.mouse_pressed_move(e.x(), e.y())
         else:
-            self.change_mouse_cursor(self.strategy.mouse_unpressed_move(e.x(), e.y()))
+            self.tool.mouse_unpressed_move(e.x(), e.y())
+
+        self.change_mouse_cursor(self.tool.get_element_part())
         self.update()
 
     def mouseReleaseEvent(self, e: QMouseEvent):
         self.mouse_pressed = False
-        self.strategy.mouse_up(e.x(), e.y())
-        self.strategy = StrategyManager.get_default_strategy(self.env)
+        self.tool.mouse_up(e.x(), e.y())
         self.update()

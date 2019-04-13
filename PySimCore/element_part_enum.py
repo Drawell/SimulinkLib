@@ -12,6 +12,8 @@ class ElementPartEnum(enum.Enum):
     TOP_LEFT = 'TOP_LEFT'
     BOTTOM_RIGHT = 'BOTTOM_RIGHT'
     BOTTOM_LEFT = 'BOTTOM_LEFT'
+    START = 'START'
+    END = 'END'
 
 
 class SocketPositionEnum(enum.Enum):

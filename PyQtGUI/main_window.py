@@ -3,14 +3,13 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QDockWidget, QAct
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QIcon
 from PyQtGUI import SimElementListModel, SimElementListView, ViewWidget
-from Environment import Environment, EnvManager
+from Environment import Environment
 
 
 class GeneralWindow(QMainWindow):
     def __init__(self):
         super(GeneralWindow, self).__init__(None)
-        self.environment = Environment(0, 0, 500, 500, 'MainEnvironment')
-        self.env_manager = EnvManager(self.environment)
+        self.env = Environment()
         self.init_component()
         self.show()
 
@@ -21,8 +20,8 @@ class GeneralWindow(QMainWindow):
         self.setCentralWidget(QWidget(self))
         self.centralWidget().setLayout(self.main_layout)
 
-        self.view_widget = ViewWidget(self, self.env_manager)
-        self.view_widget.add_element_signal.connect(self.add_element_by_name)
+        self.view_widget = ViewWidget(self, self.env)
+        #self.view_widget.add_element_signal.connect(self.add_element_by_name)
 
         self.main_layout.addWidget(self.view_widget)
         file_menu = self.menuBar().addMenu('file')
@@ -67,8 +66,8 @@ class GeneralWindow(QMainWindow):
         list_view.setModel(self.class_model)
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SimStandardElements')
-        self.env_manager.import_classes_from_dir(path)
-        self.class_model.setData(0, self.env_manager.imported_classes)
+        self.env.import_classes_from_dir(path)
+        self.class_model.setData(0, self.env.imported_classes)
 
         self.sim_elem_dock.setWidget(list_view)
 
@@ -86,10 +85,11 @@ class GeneralWindow(QMainWindow):
         dir_path = QFileDialog.getExistingDirectory(self, 'Open directory with elements',
                                                     os.path.dirname(__file__), QFileDialog.ShowDirsOnly)
         if dir_path and dir_path != '':
-            self.env_manager.import_classes_from_dir(dir_path)
+            self.env.import_classes_from_dir(dir_path)
             self.class_model.setData(0, self.env_manager.imported_classes)
             self.update()
 
+    """
     @pyqtSlot(str, int, int, name='add_element_by_name')
     def add_element_by_name(self, name: str, x: int, y: int):
         '''
@@ -103,6 +103,7 @@ class GeneralWindow(QMainWindow):
         self.env_manager.add_element_by_name(name, x, y)
         self.view_widget.update()
         self.update()
+    """
 
     @pyqtSlot(name='save_to_xml')
     def save_to_xml(self):

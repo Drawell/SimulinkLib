@@ -3,4 +3,4 @@ from ToolsStrategies.line_drawer_tool import LineDrawerTool
 from ToolsStrategies.move_tool import MoveTool
 from ToolsStrategies.observer_tool import ObserverTool
 from ToolsStrategies.resize_tool import ResizeTool
-from ToolsStrategies.strategy_manager import StrategyManager
+from ToolsStrategies.tool_manager import ToolManager

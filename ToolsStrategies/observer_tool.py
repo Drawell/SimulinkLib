@@ -1,11 +1,12 @@
 from ToolsStrategies import BaseStrategy
-from Environment import Environment
+from PySimCore import SimCompositeElement
 
 
 class ObserverTool(BaseStrategy):
-    def __init__(self, element: Environment):
+    def __init__(self, element: SimCompositeElement):
         super().__init__(element)
 
     def mouse_unpressed_move(self, x: int, y: int):
-        element, part = self.element.get_element_by_coord(x, y)
+        element, part = self.element.find_anything_by_coord(x, y)
+        #print(element, part)
         return part

@@ -15,9 +15,9 @@ class LineDrawerTool(BaseStrategy):
 
     def mouse_pressed_move(self, x: int, y: int):
         #self.box.move_to(x + self.x_indent_in_box, y + self.y_indent_in_box)
-        self.box.move_to(x - self.env.x, y - self.env.y)
+        self.box.move_to(x - self.env.cmp.x, y - self.env.cmp.y)
 
-        self.env.try_to_connect(self.element)
+        self.env.change_connection(self.element)
 
     def mouse_up(self, x: int, y: int):
         super().mouse_up(x, y)

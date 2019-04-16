@@ -1,3 +1,5 @@
+from PyQtGUI.context_widget import ContextWidget
 from PyQtGUI.sim_element_list import SimElementListModel, SimElementListView, SimElementItem
+from PyQtGUI.set_properties_dialog import SetPropertiesDialog
 from PyQtGUI.view_widget import ViewWidget
-from PyQtGUI.main_window import GeneralWindow
+from PyQtGUI.main_window import MainWindow

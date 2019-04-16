@@ -2,7 +2,7 @@ from abc import ABC
 from PySimCore import SimBox
 
 
-class BaseStrategy(ABC):
+class BaseState(ABC):
     def __init__(self, element: SimBox):
         self.element = element
         self.prev_x = 0

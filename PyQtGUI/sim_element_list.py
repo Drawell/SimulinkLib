@@ -31,6 +31,7 @@ class SimElementItem(QFrame):
     def get_name(self)->str:
         return self.element_type.get_name()
 
+
 ## Простой список с элементами
 #
 # Data, в зависимости от роли, возвращает картинку, имя, которое класс возвращает через статическую функцию,

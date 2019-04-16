@@ -16,14 +16,8 @@ class ElementPartEnum(enum.Enum):
     END = 'END'
 
 
-class SocketPositionEnum(enum.Enum):
+class RotationPositionEnum(enum.Enum):
     TOP = 'TOP'
     BOTTOM = 'BOTTOM'
     RIGHT = 'RIGHT'
     LEFT = 'LEFT'
-
-    def __invert__(other):
-        if other == SocketPositionEnum.TOP:    return SocketPositionEnum.BOTTOM
-        if other == SocketPositionEnum.BOTTOM: return SocketPositionEnum.TOP
-        if other == SocketPositionEnum.RIGHT:  return SocketPositionEnum.LEFT
-        if other == SocketPositionEnum.LEFT:   return SocketPositionEnum.RIGHT

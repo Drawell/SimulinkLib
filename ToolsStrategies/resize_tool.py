@@ -1,8 +1,8 @@
-from ToolsStrategies import BaseStrategy
+from ToolsStrategies import BaseState
 from PySimCore import SimBox, ElementPartEnum as EPE
 
 
-class ResizeTool(BaseStrategy):
+class ResizeTool(BaseState):
     def __init__(self, element: SimBox, part: EPE, x: int = 0, y: int = 0):
         super().__init__(element)
         self.mouse_down(x, y)

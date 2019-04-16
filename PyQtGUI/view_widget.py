@@ -2,16 +2,17 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QDataStream, QIODevice, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QDropEvent, QDragEnterEvent, QDragMoveEvent, QDragLeaveEvent, QMouseEvent
 
+from PyQtGUI import SetPropertiesDialog
+
 from ToolsStrategies import ToolManager
-from Environment import Environment
-from PySimCore import ElementPartEnum as EPE
+from PySimCore import ElementPartEnum as EPE, Environment
 from SimPainter import SimCairoPainter, SimQtPainter
 
 import time
 
+
 # на этом виджете будем рсовать
 class ViewWidget(QWidget):
-
     def __init__(self, parent, environment: Environment):
         super(ViewWidget, self).__init__(parent)
         self.env = environment
@@ -153,3 +154,16 @@ class ViewWidget(QWidget):
         self.mouse_pressed = False
         self.tool.mouse_up(e.x(), e.y())
         self.update()
+
+    def mouseDoubleClickEvent(self, e: QMouseEvent):
+        self.tool.mouse_double_click(e.x(), e.y())
+        element = self.tool.get_element()
+        if element is None:
+            return
+
+        element.show()
+
+        self.dialog = SetPropertiesDialog(self, element)
+        self.dialog.show()
+
+

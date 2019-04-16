@@ -1,8 +1,8 @@
-from ToolsStrategies import BaseStrategy
+from ToolsStrategies import BaseState
 from PySimCore import SimBox
 
 
-class MoveTool(BaseStrategy):
+class MoveTool(BaseState):
     def __init__(self, element: SimBox, x: int = 0, y: int = 0):
         super().__init__(element)
         self.mouse_down(x, y)

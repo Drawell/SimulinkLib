@@ -12,6 +12,7 @@ from SimStandardElements.SimConst import SimConst
 from SimStandardElements.SimSetVariable import SimSetVariable
 
 from SimPainter import SimCairoPainter, SimQtPainter
+import ast
 
 
 class TmpWindow(QMainWindow):
@@ -54,15 +55,13 @@ class TmpWindow(QMainWindow):
         const3 = SimConst(20, 150, value=4)
         self.env.add_element(const3)
 
-        out = SimSetVariable(200, 100, var_name='v')
+        out = SimSetVariable(200, 100, variable='v')
         self.env.add_element(out)
 
-        self.cmp = self.env.cmp
-
-        print(self.cmp.connect(const1, const1.output, add, add.inputs[0]))
-        print(self.cmp.connect(const2, const2.output, add, add.inputs[1]))
-        print(self.cmp.connect(const3, const3.output, add, add.inputs[2]))
-        print(self.cmp.connect(add, add.output, out, out.input))
+        print(self.env.connect(const1, const1.output, add, add.inputs[0]))
+        print(self.env.connect(const2, const2.output, add, add.inputs[1]))
+        print(self.env.connect(const3, const3.output, add, add.inputs[2]))
+        print(self.env.connect(add, add.output, out, out.input))
 
         context = {}
 
@@ -82,51 +81,39 @@ class TmpWindow(QMainWindow):
         self.painter.drawPixmap(0,0, self.canvas)
         self.painter.end()
         '''
-
-aa = {'a': [1, 2], 'b': []}
-bb = {'a': [], 'b': [1]}
-cc = {'a': [], 'b': []}
-for key in cc.keys():
-    cc[key].extend(bb[key])
-    cc[key].extend(aa[key])
-
-l = [5, 4, 3, 2, 1]
-l.append(l.pop(1))
-
-print(l)
-
-s = '+-+-+'
-for c in s:
-    print(c)
-
-'''
+#s = "[1, 2, 3, 4, 5]"
+s = "1.3"
+x = ast.literal_eval(s)
+print(x)
+#
 class A:
     def __init__(self):
         self.pr = {}
 
     def print(self):
-        print(self.pr)
-
-class B(A):
-    def __init__(self):
-        super().__init__()
-        self.qwer = 'qw'
-
-    @sim_property
-    def a(self):
-        pass
-
-    @sim_property
-    def qwer(self):
-        pass
+        return 'I AM ALIVE!'
 
 
-c = B()
-c.a = 123
-print(c.a)
-c.a = 44
-c.print()
-'''
+class B():
+    def __init__(self, a: A):
+        self.a = a
+
+    def __str__(self):
+        if self.a is None:
+            return 'NOOO'
+        return str(self.a.print())
+
+
+def ff(a):
+    del a
+
+def fff():
+    a = A()
+    b = B(a)
+    del a
+    # ff(a)
+
+    print(b)
 
 def main():
     app = QApplication(sys.argv)
@@ -134,10 +121,13 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
+    fff()
     main()
     pass
 
+
+
 """
-    1) как запилить изменение объектов при изменении типа? составной элемент
+    1) как заставить корректно работать код выше, то есть удаление в обход колектора мусора
     
 """

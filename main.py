@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from PyQtGUI.main_window import GeneralWindow
+from PyQtGUI.main_window import MainWindow
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = GeneralWindow()
+    window = MainWindow()
     sys.exit(app.exec_())

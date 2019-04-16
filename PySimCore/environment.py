@@ -1,6 +1,7 @@
 import importlib.util
 import os
-from PySimCore import SimConnection, CheckExceptionEnum as CHE, SimBaseClass, SimCompositeElement, SimPainter
+from PySimCore import SimConnection, CheckExceptionEnum as CHE, SimBaseClass, SimCompositeElement, SimPainter, \
+    OutputSocket, InputSocket
 import xml.etree.ElementTree as xml
 import xml.etree.cElementTree as cxml
 
@@ -32,7 +33,7 @@ class Environment:
     def paint(self, painter: SimPainter):
         self.cmp.paint_full(painter)
 
-    def get_variable_list(self):
+    def get_variable_list(self)-> list:
         return self.cmp.get_local_variables()
 
     def check(self, context):
@@ -94,57 +95,9 @@ class Environment:
     def add_number_for_name_generation(self, class_name: str, number: int):
         self.names_counter[class_name] = max(number, self.names_counter[class_name])
 
-    '''
-    def change_connection(self, sender: SimConnection):
-        # connect input socket
-        #print("start connection")
-        box = sender.end_box
-        x, y = self.composite_element.x, self.composite_element.y
-        input_socket = self.composite_element.find_input_socket_by_coord(
-            [(box.x + x, box.y + y), (box.x + box.width + x, box.y + y),
-             (box.x + x, box.y + box.height + y), (box.x + box.width + x, box.y + box.height + y)])
-
-        #print('input socket: ', input_socket)
-        # connect output socket
-
-        box = sender.start_box
-        output_socket = self.composite_element.find_output_socket_by_coord(
-            [(box.x + x, box.y + y), (box.x + box.width + x, box.y + y),
-             (box.x + x, box.y + box.height + y), (box.x + box.width + x, box.y + box.height + y)])
-
-        #print('output socket: ', output_socket)
-
-        if output_socket is None:  # start is disconnected
-            if sender.get_end_socket() is not None:  # end connected -> unbinding
-                sender.get_end_socket().unbind()
-            sender.set_output_socket(None)
-        else:
-            # start is connected -> set start socket
-            sender.set_output_socket(output_socket)
-
-        if input_socket is None:  # end is dis connected
-            if sender.input_socket is not None:  # but steel exists -> unbinding
-                sender.get_end_socket().unbind()
-                sender.set_input_socket(None)
-        else:
-            sender.set_input_socket(input_socket)
-            # check for already connected connections
-            for connection in self.composite_element.present_connections:
-                if connection.end_box.in_element(input_socket.x, input_socket.y) != EPE.NONE \
-                        and connection is not sender:
-                        connection.end_socket = None
-                        connection.end_box.move_to(connection.end_box.x - 10, connection.end_box.y)
-
-        if input_socket is not None and output_socket is not None:
-            # start is connected and end is connected -> binding
-            input_socket.bind_with(output_socket)
-
-        #print('Connection: Start socket: ', sender.get_start_socket(), '; End socket: ', sender.get_end_socket())
-
-    '''
-
-    def disconnect(self, sender: SimConnection):
-        pass
+    def connect(self, first_element: SimBaseClass, output_socket: OutputSocket,
+                second_element: SimBaseClass, input_socket: InputSocket):
+        self.cmp.connect(first_element, output_socket, second_element, input_socket)
 
     # need to move
 
@@ -180,7 +133,7 @@ class Environment:
                 w = int(prop['width'])
                 h = int(prop['height'])
                 name = prop['name']
-                self.cmp = Environment(x, y, w, h, name)
+                self.cmp = SimCompositeElement(x, y, name)
             elif child.tag == 'Element':
                 self.parse_element(child)
             elif child.tag == 'Connection':
@@ -221,7 +174,8 @@ class Environment:
                     prop = Environment.parse_properties(element)
                     name = prop['name']
                     index = int(prop['index'])
-                    connection.output_socket = self.cmp.get_socket(name, index)
+                    s = self.cmp.get_socket(name, index)
+                    connection.output_socket = s
 
                     if connection.input_socket is not None:
                         connection.output_socket.bind_with(connection.input_socket)
@@ -231,7 +185,8 @@ class Environment:
                     prop = Environment.parse_properties(element)
                     name = prop['name']
                     index = int(prop['index'])
-                    connection.input_socket = self.cmp.get_socket(name, index)
+                    s = self.cmp.get_socket(name, index)
+                    connection.input_socket = s
 
                     if connection.output_socket is not None:
                         connection.output_socket.bind_with(connection.input_socket)
@@ -242,7 +197,7 @@ class Environment:
     def parse_properties(parent):
         result = {}
         for prop in parent:
-            print(prop.tag)
+            #print(prop.tag)
             result[prop.tag] = prop.text
         return result
 

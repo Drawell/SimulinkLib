@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from PySimCore import SimBox, ElementPartEnum as EPE, SocketPositionEnum as SPE, CheckExceptionEnum as CHE, \
+from PySimCore import SimBox, ElementPartEnum as EPE, RotationPositionEnum as SPE, CheckExceptionEnum as CHE, \
     InputSocket, SimPainter, OutputSocket, sim_property
 import xml.etree.ElementTree as xml
 
@@ -15,14 +15,22 @@ class SimBaseClass(SimBox, ABC):
         super().__init__(x, y, width, height)
         self.name = kwargs['name'] if 'name' in kwargs else self.get_name()
 
-        #for key in kwargs.keys():
-        #    if key in self.properties.keys():
-        #        self.properties[key] = kwargs[key]
-
         self.__input_sockets__ = []
         self.__output_sockets__ = []
+        self.__set_of_indexes__ = []
         self.font = 9
         self.radius_for_resize = 3
+
+        self.update(kwargs)
+
+    def __str__(self):
+        p = '{ '
+        for key, value in self.properties.items():
+            p += key + ': ' + str(value) + ', '
+        return 'Element ' + self.name + p + '}'
+
+    def update(self, new_properties: dict):
+        pass
 
     @sim_property
     def name(self):
@@ -42,10 +50,7 @@ class SimBaseClass(SimBox, ABC):
         self.move_sockets(x, y)
         self.set_sockets_to_positions()
 
-    def show(self):
-        return None
-
-    def check(self, context):
+    def check(self, context)->dict:
         check_result = {}
 
         # all variables must to be inited
@@ -79,6 +84,7 @@ class SimBaseClass(SimBox, ABC):
         for socket in self.__input_sockets__:
             socket.set_checked(False)
 
+    @abstractmethod
     def init_simulation(self, context):
         pass
 
@@ -86,8 +92,11 @@ class SimBaseClass(SimBox, ABC):
     def iterate(self, time: float, context):
         pass
 
-    def get_local_variables(self):
+    def get_local_variables(self)-> list:
         return []
+
+    def show(self):
+        return False
 
     @staticmethod
     @abstractmethod
@@ -126,14 +135,23 @@ class SimBaseClass(SimBox, ABC):
         return len(self.__output_sockets__)
 
     def new_input_socket(self, position: SPE = SPE.LEFT):
-        idx = self.output_sockets_count() + self.input_sockets_count()
+        if len(self.__set_of_indexes__) == 0:
+            idx = self.output_sockets_count() + self.input_sockets_count()
+        else:
+            self.__set_of_indexes__.sort(reverse=True)
+            idx = self.__set_of_indexes__.pop()
+
         socket = InputSocket(idx, self.name, self.x, self.y, position)
         self.__input_sockets__.append(socket)
         SimBaseClass.set_sockets_to_positions(self)
         return socket
 
     def new_output_socket(self, position: SPE = SPE.LEFT):
-        idx = self.output_sockets_count() + self.input_sockets_count()
+        if len(self.__set_of_indexes__) == 0:
+            idx = self.output_sockets_count() + self.input_sockets_count()
+        else:
+            self.__set_of_indexes__.sort(reverse=True)
+
         socket = OutputSocket(idx, self.name, self.x, self.y, position)
         self.__output_sockets__.append(socket)
         SimBaseClass.set_sockets_to_positions(self)
@@ -142,28 +160,33 @@ class SimBaseClass(SimBox, ABC):
     def delete_all_input_sockets(self):
         for socket in self.__input_sockets__:
             socket.unbind()
+            self.__set_of_indexes__.append(socket.index)
             self.__input_sockets__.remove(socket)
+            #del socket
         self.set_sockets_to_positions()
 
     def delete_all_output_sockets(self):
         for socket in self.__output_sockets__:
             socket.unbind()
+            self.__set_of_indexes__.append(socket.index)
             self.__output_sockets__.remove(socket)
         self.set_sockets_to_positions()
 
     def delete_socket(self, socket):
+        socket.unbind()
         if socket in self.__output_sockets__:
-            socket.unbind()
+            self.__set_of_indexes__.append(socket.index)
             self.__output_sockets__.remove(socket)
 
         elif socket in self.__input_sockets__:
-            socket.unbind()
+            self.__set_of_indexes__.append(socket.index)
             self.__input_sockets__.remove(socket)
 
+        del socket
         self.set_sockets_to_positions()
 
     def get_input_socket(self, index: int)-> InputSocket:
-        for socket in self.__output_sockets__:
+        for socket in self.__input_sockets__:
             if socket.index == index:
                 return socket
         return None

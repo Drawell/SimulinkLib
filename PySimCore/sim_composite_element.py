@@ -24,7 +24,7 @@ class SimCompositeElement(SimBaseClass):
     def check(self, context):
         check_result = {CHE.VARIABLE_REQUIRED: [], CHE.DISCONNECTED_SOCKET: [], CHE.INFINITIVE_CYCLE: []}
 
-        #check for exceptions
+        # check for exceptions
         for element in self.present_elements.values():
             for key in check_result:
                 element_check_result = element.check(context)
@@ -66,6 +66,12 @@ class SimCompositeElement(SimBaseClass):
     def iterate(self, time: float, context):
         for idx in range(len(self.run_queue)):
             self.run_queue[idx].iterate(time, context)
+
+    def get_local_variables(self)-> list:
+        result = []
+        for element in self.present_elements.values():
+            result.extend(element.get_local_variables())
+        return result
 
     @staticmethod
     def paint_base(painter: SimPainter, x: float = 0, y: float = 0, w: float = 32, h: float = 32):

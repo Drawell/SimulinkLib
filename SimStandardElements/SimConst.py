@@ -5,13 +5,13 @@ from random import randint
 class SimConst(SimBaseClass):
     def __init__(self, x: int, y: int, **kwargs):
         super().__init__(x, y, kwargs)
+        self.output = self.new_output_socket()
 
-        if 'value' in kwargs:
-            self.value = int(kwargs['value'])
+    def update(self, new_properties: dict):
+        if 'value' in new_properties:
+            self.value = int(new_properties['value'])
         else:
             self.value = randint(1, 255)
-
-        self.output = self.new_output_socket()
 
     @sim_property
     def value(self):

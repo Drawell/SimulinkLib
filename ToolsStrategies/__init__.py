@@ -1,5 +1,4 @@
-from ToolsStrategies.base_strategy import BaseStrategy
-from ToolsStrategies.line_drawer_tool import LineDrawerTool
+from ToolsStrategies.base_state import BaseState
 from ToolsStrategies.move_tool import MoveTool
 from ToolsStrategies.observer_tool import ObserverTool
 from ToolsStrategies.resize_tool import ResizeTool

@@ -1,6 +1,7 @@
-from Environment import Environment
-from PySimCore import ElementPartEnum as EPE, SimBaseClass, OutputSocket, InputSocket, SimConnection, SimCompositeElement
-from ToolsStrategies import MoveTool, ResizeTool, ObserverTool, LineDrawerTool
+from PySimCore import ElementPartEnum as EPE, SimBaseClass, OutputSocket, InputSocket, SimConnection,\
+    SimCompositeElement, Environment
+from ToolsStrategies import MoveTool, ResizeTool, ObserverTool
+from typing import Union
 
 class ToolManager:
     def __init__(self, environment: Environment):
@@ -36,7 +37,8 @@ class ToolManager:
         if type(self.selected_element) is not SimCompositeElement:
             x, y = x - self.env.cmp.x, y - self.env.cmp.y
 
-        self.state.mouse_down(x, y)
+        element, part = self.state.mouse_double_click(x, y)
+        self.selected_element = element
 
     def mouse_up(self, x: int, y: int):
 
@@ -52,6 +54,13 @@ class ToolManager:
 
     def get_element_part(self)->EPE:
         return self.element_part
+
+    def get_element(self)-> Union[SimBaseClass, None]:
+        if self.selected_element is not None \
+                and issubclass(type(self.selected_element), SimBaseClass) \
+                and type(self.selected_element) is not SimCompositeElement:
+            return self.selected_element
+        return None
 
     def change_state(self, x: int, y: int):
         element, part = self.env.cmp.find_anything_by_coord(x, y)

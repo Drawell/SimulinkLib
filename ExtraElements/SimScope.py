@@ -24,4 +24,3 @@ class SimScope(SimBaseClass):
     def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
         SimScope.paint_base(painter, x, y, self.width, self.height)
         #painter.draw_text(x, y + self.height + self.font, self.name, self.font)
-

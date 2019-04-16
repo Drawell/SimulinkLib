@@ -15,6 +15,11 @@ class SimConnection(SimBox):
         self.output_socket = None
         self.input_socket = None
 
+    def __str__(self):
+        i_s = 'input ' + 'NOT' if self.input_socket is None else 'CONNECTED'
+        o_s = 'output ' + 'NOT' if self.output_socket is None else 'CONNECTED'
+        return 'Connection: ' + i_s + '; ' + o_s
+
     def move_to(self, x: int, y: int):  # moving start
         super().move_to(x, y)
         self.start_box.move_to(x, y)

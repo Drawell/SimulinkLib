@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from PySimCore import SimBox, SimPainter, SocketPositionEnum as SPE, CheckExceptionEnum as CHE
+from PySimCore import SimBox, SimPainter, RotationPositionEnum as SPE, CheckExceptionEnum as CHE
 
 point1_multiplier = {SPE.TOP: [1/2, 1],
           SPE.BOTTOM: [1/2, 0],

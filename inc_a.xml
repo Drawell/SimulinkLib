@@ -1,0 +1,26 @@
+<root>
+    <MainEnvironment>
+        <Environment>
+            <Properties><x>0</x><y>0</y><width>400</width><height>400</height><name>MainEnvironment</name></Properties>
+            <Element>SimAdd
+                <Properties>
+                    <x>194</x><y>153</y><width>50</width><height>50</height><name>SimAdd_1</name><signs>++</signs>
+                </Properties></Element>
+            <Element>SimConst
+                <Properties>
+                    <x>77</x><y>99</y><width>50</width><height>50</height><name>SimConst_1</name><value>1</value>
+                </Properties></Element>
+            <Element>SimGetVariable<Properties><x>78</x><y>184</y><width>50</width><height>50</height><name>SimGetVariable_1</name><variable>a</variable></Properties></Element>
+            <Element>SimSetVariable<Properties><x>309</x><y>153</y><width>50</width><height>50</height><name>SimSetVariable_1</name><variable>b</variable></Properties></Element>
+            <Connection>
+                <SimBox><x>135</x><y>207</y><width>195</width><height>175</height>
+                </SimBox>
+                <StartSocket>
+                <name>SimGetVariable_1</name><index>0</index>
+                </StartSocket>
+                <EndSocket>
+                <name>SimAdd_1</name><index>1</index>
+                </EndSocket>
+            </Connection>
+            <Connection>
+                <SimBox><x>135</x><y>122</y><width>185</width><height>158</height></SimBox><StartSocket><name>SimConst_1</name><index>0</index></StartSocket><EndSocket><name>SimAdd_1</name><index>0</index></EndSocket></Connection><Connection><SimBox><x>259</x><y>171</y><width>302</width><height>177</height></SimBox><StartSocket><name>SimAdd_1</name><index>2</index></StartSocket><EndSocket><name>SimSetVariable_1</name><index>0</index></EndSocket></Connection></Environment></MainEnvironment></root>

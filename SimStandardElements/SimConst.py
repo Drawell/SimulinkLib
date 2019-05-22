@@ -9,7 +9,7 @@ class SimConst(SimBaseClass):
 
     def update(self, new_properties: dict):
         if 'value' in new_properties:
-            self.value = int(new_properties['value'])
+            self.value = float(new_properties['value'])
         else:
             self.value = randint(1, 255)
 
@@ -30,11 +30,11 @@ class SimConst(SimBaseClass):
     @staticmethod
     def paint_base(painter: SimPainter, x: float = 0, y: float = 0, w: float = 32, h: float = 32):
         painter.draw_rectangle(x + 1, y + 1, w - 2, h - 2)
-        painter.draw_text(x + w / 10, y + h * 1/2, 'Const', int(min(h * 2 / 3, w * 1 / 5)))
+        painter.draw_text(x + w / 6, y + h * 1/2, 'Const', int(min(h * 2 / 3, w * 1 / 5)))
 
     @paint_func
     def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
         painter.draw_rectangle(x + 1, y + 1, self.width - 2, self.height - 2)
-        painter.draw_text(x + self.width / 10, y + self.height * 1/2,
+        painter.draw_text(x + self.width / 3, y + self.height * 1/2,
                           str(self.value), int(min(self.height * 2 / 3, self.font)))
         #painter.draw_text(x, y + self.height + self.font, self.name, self.font)

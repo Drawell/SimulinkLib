@@ -18,7 +18,7 @@ class SimGetVariable(SimBaseClass):
 
     @staticmethod
     def get_name()->str:
-        return 'GetVariable'
+        return 'Get Variable'
 
     def init_simulation(self, context):
         super().init_simulation(context)
@@ -34,4 +34,4 @@ class SimGetVariable(SimBaseClass):
     @paint_func
     def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
         painter.draw_rectangle(x + 1, y + 1, self.width - 2, self.height - 2)
-        painter.draw_text(x + self.width / 2, y + self.height / 2, self.variable, self.font)
+        painter.draw_text(x + self.width / 3, y + self.height / 2, self.variable, self.font)

@@ -12,8 +12,12 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(None)
         self.env = Environment()
         self.context = {}
+        self.import_directories = []
+        self.import_directories.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SimStandardElements'))
+        self.import_classes()
         self.init_component()
         self.show()
+
 
     def init_component(self):
         self.setWindowTitle("PySimulink")
@@ -83,7 +87,7 @@ class MainWindow(QMainWindow):
         self.tool_bar.addWidget(self.end_time_line_edit)
 
         self.tool_bar.addWidget(QLabel(' Interval: '))
-        self.interval_time_line_edit = QLineEdit('1', self)
+        self.interval_time_line_edit = QLineEdit('0.1', self)
         self.interval_time_line_edit.setMaximumWidth(40)
         self.tool_bar.addWidget(self.interval_time_line_edit)
 
@@ -97,8 +101,6 @@ class MainWindow(QMainWindow):
         self.class_model = SimElementListModel(self.sim_elem_dock)
         list_view.setModel(self.class_model)
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SimStandardElements')
-        self.env.import_classes_from_dir(path)
         self.class_model.setData(0, self.env.imported_classes)
 
         self.sim_elem_dock.setWidget(list_view)
@@ -116,10 +118,23 @@ class MainWindow(QMainWindow):
 
         self.addDockWidget(Qt.RightDockWidgetArea, self.context_dock)
 
+    def import_classes(self):
+        for dir in self.import_directories:
+            try:
+                self.env.import_classes_from_dir(dir)
+            except Exception as e:
+                msg = QMessageBox(self, )
+                msg.setWindowTitle("Import Error")
+                msg.setText(str(e.args[0]))
+                msg.addButton(QMessageBox.Ok)
+                msg.setDefaultButton(QMessageBox.Ok)
+                msg.show()
+
     def update_context(self, update_widget: bool=True):
         for var in self.env.get_variable_list():
             if var not in self.context:
                 self.context[var] = 0
+
         if update_widget:
             self.context_widget.refresh(self.context)
 
@@ -149,10 +164,8 @@ class MainWindow(QMainWindow):
                                                     os.path.dirname(__file__), QFileDialog.ShowDirsOnly)
         if dir_path and dir_path != '':
             self.env.import_classes_from_dir(dir_path)
-            self.class_model.setData(0, self.env_manager.imported_classes)
+            self.class_model.setData(0, self.env.imported_classes)
             self.update()
-
-
 
     @pyqtSlot(name='save_to_xml')
     def save_to_xml(self):
@@ -172,8 +185,12 @@ class MainWindow(QMainWindow):
                 self.env.parse_xml(path)
                 self.update_context()
             except Exception as e:
-                print(e.args)
-                QMessageBox.Question(self, "Error", "Unable to open: %s" % str(e), QMessageBox.Ok)
+                msg = QMessageBox(self, )
+                msg.setWindowTitle("Import Error")
+                msg.setText(str(e.args[0]))
+                msg.addButton(QMessageBox.Ok)
+                msg.setDefaultButton(QMessageBox.Ok)
+                msg.show()
 
             self.update()
 
@@ -185,5 +202,16 @@ class MainWindow(QMainWindow):
         end_time = float(self.end_time_line_edit.text())
         time_step = float(self.interval_time_line_edit.text())
 
-        self.env.run_simulation(start_time, end_time, time_step, self.context)
+        try:
+            self.statusBar().showMessage("running")
+            self.env.run_simulation(start_time, end_time, time_step, self.context)
+        except Exception as e:
+            msg = QMessageBox(self, )
+            msg.setWindowTitle("Run Error")
+            msg.setText(str(e.args[0]))
+            msg.addButton(QMessageBox.Ok)
+            msg.setDefaultButton(QMessageBox.Ok)
+            msg.show()
+
         self.update_context()
+        self.statusBar().showMessage("done")

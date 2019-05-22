@@ -17,7 +17,7 @@ class ElementPartEnum(enum.Enum):
 
 
 class RotationPositionEnum(enum.Enum):
-    TOP = 'TOP'
-    BOTTOM = 'BOTTOM'
-    RIGHT = 'RIGHT'
-    LEFT = 'LEFT'
+    BOTTOM = 'TOP'
+    TOP = 'BOTTOM'
+    LEFT = 'RIGHT'
+    RIGHT = 'LEFT'

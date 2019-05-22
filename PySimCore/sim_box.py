@@ -9,6 +9,12 @@ class SimBox:
         self.y = int(y)
         self.width = int(w)
         self.height = int(h)
+
+        #self.min_h = 5
+        #self.min_w = 5
+        #self.max_w = 200
+        #self.max_h = 200
+
         self.dirty = True
 
     @sim_property

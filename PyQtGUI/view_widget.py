@@ -18,16 +18,16 @@ class ViewWidget(QWidget):
         self.env = environment
         self.tool = ToolManager(self.env) #.get_default_strategy(self.env)
 
-        self.canvas = QPixmap(500, 500)  # this present size canvas
+        self.canvas = QPixmap(600, 500)  # this present size canvas
         self.canvas.fill(Qt.white)
         self.env_img = QImage()
 
         self.painter = QPainter(self)
-        self.cairo_painter = SimCairoPainter(500, 500)
-        self.qt_painter = SimQtPainter(500, 500)
+        self.cairo_painter = SimCairoPainter(600, 500)
+        self.qt_painter = SimQtPainter(600, 500)
 
-        self.setMinimumSize(400, 400)
-        self.resize(500, 500)
+        self.setMinimumSize(600, 500)
+        self.resize(600, 500)
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
         self.mouse_pressed = False

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from PySimCore import SimBox, ElementPartEnum as EPE, RotationPositionEnum as SPE, CheckExceptionEnum as CHE, \
+from PySimCore import SimBox, ElementPartEnum as EPE, RotationPositionEnum as RPE, CheckExceptionEnum as CHE, \
     InputSocket, SimPainter, OutputSocket, sim_property
 import xml.etree.ElementTree as xml
 
@@ -42,7 +42,8 @@ class SimBaseClass(SimBox, ABC):
         pass
 
     def resize(self, w: int, h: int):
-        super().resize(max(w, 32), max(h, 32))
+        super().resize(w, h)
+        self.move_sockets(self.x, self.y)
         self.set_sockets_to_positions()
 
     def move_to(self, x: int, y: int):
@@ -50,7 +51,7 @@ class SimBaseClass(SimBox, ABC):
         self.move_sockets(x, y)
         self.set_sockets_to_positions()
 
-    def check(self, context)->dict:
+    def check(self, context: dict) -> dict:
         check_result = {}
 
         # all variables must to be inited
@@ -85,14 +86,14 @@ class SimBaseClass(SimBox, ABC):
             socket.set_checked(False)
 
     @abstractmethod
-    def init_simulation(self, context):
+    def init_simulation(self, context: dict):
         pass
 
     @abstractmethod
-    def iterate(self, time: float, context):
+    def iterate(self, time: float, context: dict):
         pass
 
-    def get_local_variables(self)-> list:
+    def get_local_variables(self) -> list:
         return []
 
     def show(self):
@@ -103,10 +104,10 @@ class SimBaseClass(SimBox, ABC):
     def paint_base(painter: SimPainter, x: float = 0, y: float = 0, w: float = 32, h: float = 32):
         pass
 
-    #def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
-        #pass
+    # def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
+    # pass
 
-    def in_element(self, x: int, y: int)-> EPE:
+    def in_element(self, x: int, y: int) -> EPE:
         radius = self.radius_for_resize
         if self.x + self.width < x or x < self.x \
                 or self.y + self.height < y or y < self.y:
@@ -134,7 +135,7 @@ class SimBaseClass(SimBox, ABC):
     def output_sockets_count(self):
         return len(self.__output_sockets__)
 
-    def new_input_socket(self, position: SPE = SPE.LEFT):
+    def new_input_socket(self, position: RPE = RPE.RIGHT):
         if len(self.__set_of_indexes__) == 0:
             idx = self.output_sockets_count() + self.input_sockets_count()
         else:
@@ -146,11 +147,12 @@ class SimBaseClass(SimBox, ABC):
         SimBaseClass.set_sockets_to_positions(self)
         return socket
 
-    def new_output_socket(self, position: SPE = SPE.LEFT):
+    def new_output_socket(self, position: RPE = RPE.RIGHT):
         if len(self.__set_of_indexes__) == 0:
             idx = self.output_sockets_count() + self.input_sockets_count()
         else:
             self.__set_of_indexes__.sort(reverse=True)
+            idx = self.__set_of_indexes__.pop()
 
         socket = OutputSocket(idx, self.name, self.x, self.y, position)
         self.__output_sockets__.append(socket)
@@ -162,7 +164,7 @@ class SimBaseClass(SimBox, ABC):
             socket.unbind()
             self.__set_of_indexes__.append(socket.index)
             self.__input_sockets__.remove(socket)
-            #del socket
+            # del socket
         self.set_sockets_to_positions()
 
     def delete_all_output_sockets(self):
@@ -185,13 +187,13 @@ class SimBaseClass(SimBox, ABC):
         del socket
         self.set_sockets_to_positions()
 
-    def get_input_socket(self, index: int)-> InputSocket:
+    def get_input_socket(self, index: int) -> InputSocket:
         for socket in self.__input_sockets__:
             if socket.index == index:
                 return socket
         return None
 
-    def get_output_socket(self, index: int)-> OutputSocket:
+    def get_output_socket(self, index: int) -> OutputSocket:
         for socket in self.__output_sockets__:
             if socket.index == index:
                 return socket
@@ -226,7 +228,6 @@ class SimBaseClass(SimBox, ABC):
             prop = xml.SubElement(props, key)
             prop.text = str(value)
 
-        #sockets = xml.SubElement(element, 'Sockets')
-        #for socket in self.__input_sockets__:
+        # sockets = xml.SubElement(element, 'Sockets')
+        # for socket in self.__input_sockets__:
         #    xml_socket = xml.SubElement(props, 'InputSocket')
-

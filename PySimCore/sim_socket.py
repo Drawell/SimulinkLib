@@ -1,24 +1,24 @@
 from abc import ABC, abstractmethod
-from PySimCore import SimBox, SimPainter, RotationPositionEnum as SPE, CheckExceptionEnum as CHE
+from PySimCore import SimBox, SimPainter, RotationPositionEnum as RPE, CheckExceptionEnum as CHE
 
-point1_multiplier = {SPE.TOP: [1/2, 1],
-          SPE.BOTTOM: [1/2, 0],
-          SPE.RIGHT: [0, 1/2],
-          SPE.LEFT: [1, 1/2]}
+point1_multiplier = {RPE.BOTTOM: [1 / 2, 1],
+                     RPE.TOP: [1 / 2, 0],
+                     RPE.LEFT: [0, 1 / 2],
+                     RPE.RIGHT: [1, 1 / 2]}
 
-point2_multiplier = {SPE.TOP: [0, 0],
-          SPE.BOTTOM: [1, 1],
-          SPE.RIGHT: [1, 0],
-          SPE.LEFT: [0, 1]}
+point2_multiplier = {RPE.BOTTOM: [0, 0],
+                     RPE.TOP: [1, 1],
+                     RPE.LEFT: [1, 0],
+                     RPE.RIGHT: [0, 1]}
 
-point3_multiplier = {SPE.TOP: [1, 0],
-          SPE.BOTTOM: [0, 1],
-          SPE.RIGHT: [1, 1],
-          SPE.LEFT: [0, 0]}
+point3_multiplier = {RPE.BOTTOM: [1, 0],
+                     RPE.TOP: [0, 1],
+                     RPE.LEFT: [1, 1],
+                     RPE.RIGHT: [0, 0]}
 
 
 class Socket(SimBox, ABC):
-    def __init__(self, index: int, name: str, x: int, y: int, position: SPE):
+    def __init__(self, index: int, name: str, x: int, y: int, position: RPE):
         self.size = 10
         super().__init__(x, y, self.size, self.size)
         self.position = position
@@ -80,15 +80,18 @@ class Socket(SimBox, ABC):
 
 
 class InputSocket(Socket):
-    def __init__(self, index: int, name: str, x=0, y=0, position: SPE = SPE.LEFT):
+    def __init__(self, index: int, name: str, x=0, y=0, position: RPE = RPE.RIGHT):
         super().__init__(index, name, x, y, position)
         self.output_socket = None
 
     def __str__(self):
         return 'Input Socket: Value = %s; %s' % ('nope' if self.get_value() is None else str(self.get_value()),
-                                   'Bind' if self.output_socket else 'Not bind')
+                                                 'Bind' if self.output_socket else 'Not bind')
 
     def check(self) -> CHE:
+        if self.checked:
+            return CHE.OK
+
         if self.output_socket is None:
             return CHE.DISCONNECTED_SOCKET
         elif self.output_socket.check() != CHE.OK:
@@ -114,7 +117,7 @@ class InputSocket(Socket):
 
 
 class OutputSocket(Socket):
-    def __init__(self, index: int, name: str, x=0, y=0, position: SPE = SPE.LEFT):
+    def __init__(self, index: int, name: str, x=0, y=0, position: RPE = RPE.RIGHT):
         super().__init__(index, name, x, y, position)
         self.value = None
 

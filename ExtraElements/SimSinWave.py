@@ -1,16 +1,15 @@
-from PySimCore.sim_base_class import SimBaseClass, paint_func
-from PySimCore.sim_painter import SimPainter
+from PySimCore import SimBaseClass, SimPainter, paint_func
 
 
 class SimSinWave(SimBaseClass):
-    def __init__(self, x: int, y: int, amplitude: float = 0, phase: float = 0, **kwargs):
+    def __init__(self, x: int, y: int, **kwargs):
         super().__init__(x, y, kwargs)
-        self.amplitude = amplitude
-        self.phase = phase
+        #self.amplitude = amplitude
+        #self.phase = phase
 
     @staticmethod
     def get_name()->str:
-        return 'Sin Wave'
+        return 'SinWave'
 
     def init_simulation(self, context):
         pass

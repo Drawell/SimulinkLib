@@ -1,19 +1,31 @@
 from PySimCore import SimBaseClass, paint_func, SimPainter
+import matplotlib.pyplot as plt
 
 
 class SimScope(SimBaseClass):
     def __init__(self, x: int, y: int, **kwargs):
         super().__init__(x, y, kwargs)
+        self.time = []
+        self.values = []
+        self.input = self.new_input_socket()
 
     @staticmethod
     def get_name()->str:
         return 'SimScope'
 
     def init_simulation(self, context):
-        pass
+        super().init_simulation(context)
+        self.time = []
+        self.values = []
 
     def iterate(self, time: float, context):
-        pass
+        self.time.append(time)
+        value = float(self.input.get_value())
+        self.values.append(value)
+
+    def show(self):
+        plt.plot(self.time, self.values)
+        return super().show()
 
     @staticmethod
     def paint_base(painter: SimPainter, x: float = 0, y: float = 0, w: float = 32, h: float = 32):

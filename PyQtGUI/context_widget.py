@@ -33,6 +33,10 @@ class ContextWidget(QDialog):
             self.main_layout.addLayout(tmp_layout)
 
     def change_value(self, variable, value):
+        try:
+            value = float(value)
+        except:
+            value = value[:1]
         self.var_changed_signal.emit(variable, float(value))
 
     def clear_layout(self):

@@ -63,7 +63,7 @@ class SimCairoPainter(SimPainter):
             b.seek(0)
             data = b.read()
 
-        print("convert surface to byte data; w= %s, h= %s; time= %.5f" %
-              (self.surface.get_width(), self.surface.get_height(), time.time() - t))
+        #print("convert surface to byte data; w= %s, h= %s; time= %.5f" %
+        #      (self.surface.get_width(), self.surface.get_height(), time.time() - t))
 
         return data

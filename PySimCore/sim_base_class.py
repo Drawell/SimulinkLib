@@ -165,6 +165,7 @@ class SimBaseClass(SimBox, ABC):
             self.__set_of_indexes__.append(socket.index)
             self.__input_sockets__.remove(socket)
             # del socket
+
         self.set_sockets_to_positions()
 
     def delete_all_output_sockets(self):
@@ -218,16 +219,3 @@ class SimBaseClass(SimBox, ABC):
         for i, s in enumerate(self.__output_sockets__):
             s.set_to_pos(self.width, y - 5)
             y += step
-
-    def save_to_xml(self, parent):
-        element = xml.SubElement(parent, 'Element')
-        element.text = self.__class__.__name__
-
-        props = xml.SubElement(element, 'Properties')
-        for key, value in self.properties.items():
-            prop = xml.SubElement(props, key)
-            prop.text = str(value)
-
-        # sockets = xml.SubElement(element, 'Sockets')
-        # for socket in self.__input_sockets__:
-        #    xml_socket = xml.SubElement(props, 'InputSocket')

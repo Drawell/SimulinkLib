@@ -105,16 +105,20 @@ class SimCompositeElement(SimBaseClass):
                 or output_socket is None or input_socket is None:
             return False
 
-        output_socket.bind_with(input_socket)
         connection = SimConnection(self, output_socket.x, output_socket.y, input_socket.x, input_socket.y)
         connection.set_output_socket(output_socket)
         connection.set_input_socket(input_socket)
+        output_socket.bind_with(input_socket, connection)
         self.add_connection(connection)
         return True
 
     def add_connection(self, connection: SimConnection):
         self.present_connections.append(connection)
         self.dirty = True
+
+    def delete_connection(self, connection: SimConnection):
+        if connection in self.present_connections:
+            self.present_connections.remove(connection)
 
     def get_element_by_name(self, name: str):
         if name in self.present_elements.keys():
@@ -184,17 +188,3 @@ class SimCompositeElement(SimBaseClass):
             return something, EPE.NONE
 
         return None, None
-
-    def save_to_xml(self, parent):
-        env_xml = xml.SubElement(parent, 'Environment')
-
-        props = xml.SubElement(env_xml, 'Properties')
-        for key, value in self.properties.items():
-            prop = xml.SubElement(props, key)
-            prop.text = str(value)
-
-        for element in self.present_elements.values():
-            element.save_to_xml(env_xml)
-
-        for connection in self.present_connections:
-            connection.save_to_xml(env_xml)

@@ -79,7 +79,7 @@ class ToolManager:
 
         elif type(element) is SimConnection:
             element.move_to(element.start_box.x, element.start_box.y)
-            element.resize(element.end_box.x, element.end_box.y)
+            #element.resize(element.end_box.x, element.end_box.y)
 
             if part == EPE.START:  # moving start
                 self.state = MoveTool(element, x, y)
@@ -91,6 +91,7 @@ class ToolManager:
         elif type(element) in [InputSocket, OutputSocket]:
             x, y = x - self.env.cmp.x, y - self.env.cmp.y
             connection = SimConnection(self.env.cmp, x, y, x, y)
+            element.connection = connection
             self.env.cmp.add_connection(connection)
             if type(element) is InputSocket:
                     connection.set_input_socket(element)

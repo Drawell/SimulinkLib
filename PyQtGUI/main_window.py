@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QIcon
 from PyQtGUI import SimElementListModel, SimElementListView, ViewWidget, ContextWidget
 from PySimCore import Environment
-
+from Utils import XMLParser
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -173,7 +173,8 @@ class MainWindow(QMainWindow):
                                            os.path.dirname(os.path.dirname(__file__)), "XML Files (*.xml)")[0]
 
         if path and path != '':
-            self.env.save_to_xml(path)
+            XMLParser.save(self.env, path)
+            #self.env.save_to_xml(path)
 
     @pyqtSlot(name='open_xml')
     def open_xml(self):
@@ -182,7 +183,9 @@ class MainWindow(QMainWindow):
 
         if path and path != '':
             try:
-                self.env.parse_xml(path)
+                self.env = XMLParser.parse(path, self.import_directories)
+                self.view_widget.env = self.env
+                #self.env.parse_xml(path)
                 self.update_context()
             except Exception as e:
                 msg = QMessageBox(self, )

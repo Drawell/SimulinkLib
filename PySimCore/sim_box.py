@@ -52,9 +52,3 @@ class SimBox:
             return EPE.CENTER
 
         return EPE.NONE
-
-    def save_to_xml(self, parent):
-        box_xml = xml.SubElement(parent, 'SimBox')
-        for key, value in self.properties.items():
-            prop = xml.SubElement(box_xml, key)
-            prop.text = str(value)

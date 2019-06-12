@@ -24,7 +24,7 @@ class SimConnection(SimBox):
         super().move_to(x, y)
         self.start_box.move_to(x, y)
 
-        self.output_socket = None
+        #self.output_socket = None
 
         # try to connect
         # can connect to output
@@ -35,13 +35,15 @@ class SimConnection(SimBox):
             (self.x + self.start_box.width, self.y + self.start_box.height)])
 
         #print(socket)
+        self.set_output_socket(socket)
+
         if socket is None:
             return
 
-        self.output_socket = socket
+       #self.output_socket = socket
 
         if self.input_socket is not None:
-            self.input_socket.bind_with(socket)
+            self.input_socket.bind_with(socket, self)
 
         self.start_box.move_to(socket.x, socket.y)
 
@@ -51,7 +53,7 @@ class SimConnection(SimBox):
 
         if self.input_socket is not None:
             self.input_socket.unbind()
-        self.input_socket = None
+        #self.input_socket = None
 
         # try to connect
         # can connect to input
@@ -62,18 +64,20 @@ class SimConnection(SimBox):
             (self.width + self.end_box.width, self.height + self.end_box.height)])
 
         #print(socket)
+
+        self.set_input_socket(socket)
+
         if socket is None:
             return
 
+        # disconnect other connection from socket if it was in it
         if socket.output_socket is not None:
             other_connection, part = self.cmp.find_connection_by_coord(socket.x + socket.size / 2, socket.y + socket.size / 2)
             if other_connection is not None and part == EPE.END:
                 other_connection.disconnect_from_input()
 
-        self.input_socket = socket
-
         if self.output_socket is not None:
-            socket.bind_with(self.output_socket)
+            socket.bind_with(self.output_socket, self)
 
         self.end_box.move_to(socket.x, socket.y)
 
@@ -91,9 +95,13 @@ class SimConnection(SimBox):
 
     def set_output_socket(self, socket: OutputSocket):
         self.output_socket = socket
+        if self.input_socket is None and self.output_socket is None:
+            self.cmp.delete_connection(self)
 
     def set_input_socket(self, socket: InputSocket):
         self.input_socket = socket
+        if self.input_socket is None and self.output_socket is None:
+            self.cmp.delete_connection(self)
 
     def paint(self, painter: SimPainter, x_indent: float = 0, y_indent: float = 0, scale: float = 1):
         painter.set_pen_width(3)
@@ -156,30 +164,3 @@ class SimConnection(SimBox):
         if self.input_socket is not None:
             self.input_socket.unbind()
             self.input_socket = None
-
-
-    # need to move
-
-    def save_to_xml(self, parent):
-        connection_xml = xml.SubElement(parent, 'Connection')
-        #self.move_to(self.start_box.x, self.start_box.y)
-        #self.resize(self.end_box.x, self.end_box.y)
-        super().save_to_xml(connection_xml)
-
-        start_socket_xml = xml.SubElement(connection_xml, 'StartSocket')
-        if self.input_socket is None:
-            none_tag = xml.SubElement(start_socket_xml, 'None')
-        else:
-            name_xml = xml.SubElement(start_socket_xml, 'name')
-            name_xml.text = self.output_socket.name
-            index_xml = xml.SubElement(start_socket_xml, 'index')
-            index_xml.text = str(self.output_socket.index)
-
-        end_socket_xml = xml.SubElement(connection_xml, 'EndSocket')
-        if self.input_socket is None:
-            none_tag = xml.SubElement(end_socket_xml, 'None')
-        else:
-            name_xml = xml.SubElement(end_socket_xml, 'name')
-            name_xml.text = self.input_socket.name
-            index_xml = xml.SubElement(end_socket_xml, 'index')
-            index_xml.text = str(self.input_socket.index)

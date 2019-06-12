@@ -18,15 +18,16 @@ point3_multiplier = {RPE.BOTTOM: [1, 0],
 
 
 class Socket(SimBox, ABC):
-    def __init__(self, index: int, name: str, x: int, y: int, position: RPE):
+    def __init__(self, index: int, parent_name: str, x: int, y: int, position: RPE):
         self.size = 10
         super().__init__(x, y, self.size, self.size)
         self.position = position
         self.index = index
-        self.name = name
+        self.parent_name = parent_name
         self.x_in_parent = 0
         self.y_in_parent = 0
         self.checked = False
+        self.connection = None
 
     def __str__(self):
         return 'Socket: ' + 'Not value' if self.get_value() is None else str(self.get_value())
@@ -47,6 +48,9 @@ class Socket(SimBox, ABC):
     def set_checked(self, is_checked=True):
         self.checked = is_checked
 
+    #def set_connection(self, connection: SimConnection):
+        #self.connection = connection
+
     @abstractmethod
     def check(self) -> CHE:
         pass
@@ -60,12 +64,13 @@ class Socket(SimBox, ABC):
         pass
 
     @abstractmethod
-    def bind_with(self, socket):
+    def bind_with(self, socket, connection):
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def unbind(self):
-        pass
+        if self.connection is not None:
+            self.connection.set_input_socket(None)
 
     def paint(self, painter: SimPainter, x: float = 0, y: float = 0, scale: float = 1):
         x1 = x + self.x + self.size * point1_multiplier[self.position][0]
@@ -108,12 +113,15 @@ class InputSocket(Socket):
     def is_bind(self):
         return self.output_socket is not None
 
-    def bind_with(self, socket):
+    def bind_with(self, socket, connection):
         if socket is not None and type(socket) is OutputSocket:
             self.output_socket = socket
+            self.connection = connection
 
     def unbind(self):
+        super().unbind()
         self.output_socket = None
+
 
 
 class OutputSocket(Socket):
@@ -136,9 +144,9 @@ class OutputSocket(Socket):
     def put_value(self, value):
         self.value = value
 
-    def bind_with(self, socket):
+    def bind_with(self, socket, connection):
         if type(socket) is InputSocket:
-            socket.bind_with(self)
+            socket.bind_with(self, connection)
 
-    def unbind(self):
-        pass
+    #def unbind(self):
+        #pass

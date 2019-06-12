@@ -13,7 +13,7 @@ from SimStandardElements.SimSetVariable import SimSetVariable
 from SimPainter import SimCairoPainter, SimQtPainter
 import ast
 
-
+"""
 class TmpWindow(QMainWindow):
     def __init__(self):
         super(TmpWindow, self).__init__(None)
@@ -136,6 +136,4 @@ if __name__ == '__main__':
     pass
 
 """
-    1) как заставить корректно работать код выше, то есть удаление в обход колектора мусора
-    
-"""
+
